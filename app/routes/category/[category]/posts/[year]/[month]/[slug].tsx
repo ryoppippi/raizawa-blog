@@ -1,6 +1,6 @@
 import { ssgParams } from "hono/ssg";
 import { createRoute } from "honox/factory";
-import PostDetail from "../../../../../../components/post-detail";
+import { PostDetail } from "../../../../../../components/post-detail";
 import { SITE_URL } from "../../../../../../lib/config";
 import {
   getAdjacentPosts,

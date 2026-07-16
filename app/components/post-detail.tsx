@@ -1,8 +1,9 @@
-import { type Post, type PostMeta } from "../lib/posts";
+import type { FC } from "hono/jsx";
 import { SITE_TITLE, SITE_URL } from "../lib/config";
-import Layout from "./layout";
+import type { Post, PostMeta } from "../lib/posts";
+import { Layout } from "./layout";
 import { TocLayout, shouldShowToc } from "./toc";
-import UpdatedAt from "./updated-at";
+import { UpdatedAt } from "./updated-at";
 
 const copyScript = `document.querySelectorAll('.copy-button').forEach(button => {
   button.addEventListener('click', async () => {
@@ -16,7 +17,10 @@ const copyScript = `document.querySelectorAll('.copy-button').forEach(button => 
   });
 });`;
 
-const PrevPostLink = ({ linkPrefix, prev }: { linkPrefix: string; prev: PostMeta | undefined }) => {
+const PrevPostLink: FC<{ linkPrefix: string; prev: PostMeta | undefined }> = ({
+  linkPrefix,
+  prev,
+}) => {
   if (prev === undefined) {
     return <div />;
   }
@@ -33,7 +37,10 @@ const PrevPostLink = ({ linkPrefix, prev }: { linkPrefix: string; prev: PostMeta
   );
 };
 
-const NextPostLink = ({ linkPrefix, next }: { linkPrefix: string; next: PostMeta | undefined }) => {
+const NextPostLink: FC<{ linkPrefix: string; next: PostMeta | undefined }> = ({
+  linkPrefix,
+  next,
+}) => {
   if (next === undefined) {
     return <></>;
   }
@@ -50,15 +57,11 @@ const NextPostLink = ({ linkPrefix, next }: { linkPrefix: string; next: PostMeta
   );
 };
 
-const PostNav = ({
-  linkPrefix,
-  next,
-  prev,
-}: {
+const PostNav: FC<{
   linkPrefix: string;
   next: PostMeta | undefined;
   prev: PostMeta | undefined;
-}) => {
+}> = ({ linkPrefix, next, prev }) => {
   if (prev === undefined && next === undefined) {
     return <></>;
   }
@@ -70,8 +73,8 @@ const PostNav = ({
   );
 };
 
-const PostHeader = ({ meta, pagefindBody }: { meta: PostMeta; pagefindBody: boolean }) => (
-  <header class="card bg-base-100 shadow-sm mb-6" data-pagefind-body={pagefindBody ? "" : undefined}>
+const PostHeader: FC<{ meta: PostMeta; pagefindBody: boolean }> = ({ meta, pagefindBody }) => (
+  <header class="card bg-base-100 shadow-sm mb-6" data-pagefind-body={pagefindBody || undefined}>
     <div class="card-body p-6">
       <h1 class="text-2xl sm:text-3xl font-bold">{meta.title}</h1>
       <div class="text-sm opacity-70 mt-1">
@@ -109,7 +112,14 @@ interface PostDetailProps {
   prev: PostMeta | undefined;
 }
 
-const PostDetail = ({ linkPrefix, next, ogUrl, pagefindBody = false, post, prev }: PostDetailProps) => {
+const PostDetail: FC<PostDetailProps> = ({
+  linkPrefix,
+  next,
+  ogUrl,
+  pagefindBody = false,
+  post,
+  prev,
+}) => {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
@@ -131,10 +141,7 @@ const PostDetail = ({ linkPrefix, next, ogUrl, pagefindBody = false, post, prev 
     >
       <TocLayout items={post.toc}>
         <PostHeader meta={post.meta} pagefindBody={pagefindBody} />
-        <article
-          class="card bg-base-100 shadow-sm"
-          data-pagefind-body={pagefindBody ? "" : undefined}
-        >
+        <article class="card bg-base-100 shadow-sm" data-pagefind-body={pagefindBody || undefined}>
           <div
             class="card-body p-6 prose-article"
             dangerouslySetInnerHTML={{ __html: post.html }}
@@ -147,4 +154,4 @@ const PostDetail = ({ linkPrefix, next, ogUrl, pagefindBody = false, post, prev 
   );
 };
 
-export default PostDetail;
+export { PostDetail };
