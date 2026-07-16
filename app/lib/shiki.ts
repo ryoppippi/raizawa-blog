@@ -3,9 +3,10 @@ import {
   transformerNotationErrorLevel,
   transformerNotationHighlight,
 } from "@shikijs/transformers";
-import { type HighlighterCore, createHighlighterCore } from "shiki/core";
+import { createHighlighterCore } from "shiki/core";
+import type { HighlighterCore } from "shiki/core";
 import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
-import { type ShikiTransformer } from "shiki";
+import type { ShikiTransformer } from "shiki";
 
 const SHIKI_THEME = "one-dark-pro";
 
@@ -28,7 +29,7 @@ const extractTitle = (meta: string | undefined): string | undefined => {
 // Custom transformer to add title to code block
 const transformerMetaTitle = (): ShikiTransformer => ({
   name: "meta-title",
-  pre(node) {
+  pre(node): void {
     const title = extractTitle(this.options.meta?.__raw);
     if (title === undefined || title === "") {
       return;
@@ -46,9 +47,9 @@ const transformerMetaTitle = (): ShikiTransformer => ({
 // Custom transformer to wrap code block with copy button
 const transformerCodeWrapper = (): ShikiTransformer => ({
   name: "code-wrapper",
-  root(node) {
+  root(node): void {
     const [pre] = node.children;
-    if (pre === undefined || pre.type !== "element") {
+    if (pre?.type !== "element") {
       return;
     }
 

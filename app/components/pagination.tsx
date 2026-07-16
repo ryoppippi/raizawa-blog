@@ -1,3 +1,4 @@
+import type { FC } from "hono/jsx";
 import { getPageHref, getPageNumbers, getPrevHref } from "../lib/pagination";
 
 interface PaginationProps {
@@ -5,7 +6,7 @@ interface PaginationProps {
   totalPages: number;
 }
 
-export default function Pagination({ currentPage, totalPages }: PaginationProps) {
+const Pagination: FC<PaginationProps> = ({ currentPage, totalPages }) => {
   const prevHref = getPrevHref(currentPage);
   const pageNumbers = getPageNumbers(currentPage, totalPages);
 
@@ -47,4 +48,6 @@ export default function Pagination({ currentPage, totalPages }: PaginationProps)
       </div>
     </div>
   );
-}
+};
+
+export { Pagination };

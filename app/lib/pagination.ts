@@ -50,7 +50,7 @@ const getPageNumbers = (
 ): (number | string)[] => {
   const pages: (number | string)[] = [];
 
-  for (let pageNum = FIRST_PAGE; pageNum <= totalPages; pageNum++) {
+  for (let pageNum = FIRST_PAGE; pageNum <= totalPages; pageNum += 1) {
     const isFirst = pageNum === FIRST_PAGE;
     const isLast = pageNum === totalPages;
     const isNearCurrent = Math.abs(pageNum - currentPage) <= showRange;

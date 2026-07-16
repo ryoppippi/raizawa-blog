@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { shouldShowToc } from "../components/toc";
-import { type TocItem } from "./toc";
+import type { TocItem } from "./toc";
 
 const item = (id: string): TocItem => ({ id, level: 2, text: id });
 

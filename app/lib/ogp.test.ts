@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { type OGPData, generateOGPCard } from "./ogp";
+import { generateOGPCard } from "./ogp";
+import type { OGPData } from "./ogp";
 
 describe("OGP card generation", () => {
   it("should generate card with all OGP data", () => {

@@ -71,9 +71,9 @@ describe("getPageNumbers", () => {
 
   describe("no consecutive ellipsis", () => {
     it("should never have consecutive ellipsis", () => {
-      for (let page = 1; page <= 100; page++) {
+      for (let page = 1; page <= 100; page += 1) {
         const result = getPageNumbers(page, 100);
-        for (let idx = 1; idx < result.length; idx++) {
+        for (let idx = 1; idx < result.length; idx += 1) {
           const prev = result[idx - 1];
           const curr = result[idx];
           expect(prev === "..." && curr === "...").toBe(false);
@@ -84,14 +84,14 @@ describe("getPageNumbers", () => {
 
   describe("first and last always present", () => {
     it("should always include first page", () => {
-      for (let page = 1; page <= 20; page++) {
+      for (let page = 1; page <= 20; page += 1) {
         const result = getPageNumbers(page, 20);
         expect(result[0]).toBe(1);
       }
     });
 
     it("should always include last page", () => {
-      for (let page = 1; page <= 20; page++) {
+      for (let page = 1; page <= 20; page += 1) {
         const result = getPageNumbers(page, 20);
         expect(result.at(-1)).toBe(20);
       }

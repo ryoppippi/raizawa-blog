@@ -7,7 +7,15 @@ Allow: /
 Sitemap: ${SITE_URL}/sitemap.xml`;
 
 // WebSite JSON-LD generation logic
-const createWebSiteJsonLd = () => ({
+interface WebSiteJsonLd {
+  "@context": string;
+  "@type": string;
+  description: string;
+  name: string;
+  url: string;
+}
+
+const createWebSiteJsonLd = (): WebSiteJsonLd => ({
   "@context": "https://schema.org",
   "@type": "WebSite",
   description: SITE_DESCRIPTION,
@@ -23,7 +31,22 @@ interface BlogPostingParams {
   updatedAt: string;
 }
 
-const createBlogPostingJsonLd = ({ createdAt, slug, title, updatedAt }: BlogPostingParams) => ({
+interface BlogPostingJsonLd {
+  "@context": string;
+  "@type": string;
+  author: { "@type": string; name: string };
+  dateModified: string;
+  datePublished: string;
+  headline: string;
+  url: string;
+}
+
+const createBlogPostingJsonLd = ({
+  createdAt,
+  slug,
+  title,
+  updatedAt,
+}: BlogPostingParams): BlogPostingJsonLd => ({
   "@context": "https://schema.org",
   "@type": "BlogPosting",
   author: { "@type": "Person", name: "r-aizawa" },

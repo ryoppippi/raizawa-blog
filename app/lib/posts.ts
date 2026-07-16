@@ -1,7 +1,7 @@
 import { matter } from "gray-matter-es";
 import gitTimestamps from "virtual:git-timestamps";
-import renderMarkdown from "./markdown";
-import { type TocItem } from "./toc";
+import { renderMarkdown } from "./markdown";
+import type { TocItem } from "./toc";
 
 // Type definitions
 interface PostMeta {

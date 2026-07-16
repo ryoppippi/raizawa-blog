@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { readdirSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
-import { type Plugin } from "vite";
+import type { Plugin } from "vite";
 
 const VIRTUAL_MODULE_ID = "virtual:git-timestamps";
 const RESOLVED_VIRTUAL_MODULE_ID = `\0${VIRTUAL_MODULE_ID}`;
@@ -83,7 +83,7 @@ const findLastBodyChange = (commits: CommitEntry[], ctx: FileContext): string | 
     return undefined;
   }
 
-  for (let idx = 0; idx < commits.length - 1; idx++) {
+  for (let idx = 0; idx < commits.length - 1; idx += 1) {
     const current = commits[idx];
     const older = commits[idx + 1];
     if (current === undefined || older === undefined) {
@@ -171,4 +171,4 @@ const gitTimestampsPlugin = (postsDir: string): Plugin => {
   };
 };
 
-export default gitTimestampsPlugin;
+export { gitTimestampsPlugin };

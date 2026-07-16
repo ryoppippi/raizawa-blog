@@ -1,7 +1,7 @@
 import { createRoute } from "honox/factory";
-import Layout from "../../components/layout";
-import Pagination from "../../components/pagination";
-import PostList from "../../components/post-list";
+import { Layout } from "../../components/layout";
+import { Pagination } from "../../components/pagination";
+import { PostList } from "../../components/post-list";
 import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "../../lib/config";
 import { getPostsForPage, getTotalPages } from "../../lib/posts";
 

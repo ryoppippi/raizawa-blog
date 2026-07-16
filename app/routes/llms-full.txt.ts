@@ -1,7 +1,8 @@
 import { createRoute } from "honox/factory";
 import { SITE_DESCRIPTION, SITE_TITLE } from "../lib/config";
 import { HTTP_OK } from "../lib/http";
-import { type Post, getAllPosts, getPostBySlug } from "../lib/posts";
+import { getAllPosts, getPostBySlug } from "../lib/posts";
+import type { Post } from "../lib/posts";
 
 const formatPost = (post: Post): string => {
   const meta = [
@@ -22,7 +23,7 @@ const formatPost = (post: Post): string => {
 
 export default createRoute(async (c) => {
   const postsMeta = getAllPosts();
-  const posts = await Promise.all(postsMeta.map((meta) => getPostBySlug(meta.slug)));
+  const posts = await Promise.all(postsMeta.map(async (meta) => await getPostBySlug(meta.slug)));
   const validPosts = posts.filter((post): post is Post => post !== undefined);
 
   const header = `# ${SITE_TITLE}\n\n> ${SITE_DESCRIPTION}`;

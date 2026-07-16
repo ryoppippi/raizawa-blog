@@ -1,7 +1,7 @@
 import anchor from "markdown-it-anchor";
 import preprocessOgpCards from "./markdown-it-ogp-card";
 import { SHIKI_THEME, getHighlighter, shikiTransformers } from "./shiki";
-import { type RenderResult, type TocItem } from "./toc";
+import type { RenderResult, TocItem } from "./toc";
 import MarkdownIt from "markdown-it";
 
 // Initialize markdown-it
@@ -45,7 +45,7 @@ const resolveLang = (lang: string, loadedLangs: string[]): string => {
   return "text";
 };
 
-const initShiki = async () => {
+const initShiki = async (): Promise<void> => {
   if (shikiInitialized) {
     return;
   }
@@ -53,7 +53,7 @@ const initShiki = async () => {
   const highlighter = await getHighlighter();
 
   // Custom fence renderer using Shiki
-  md.renderer.rules.fence = (tokens, idx) => {
+  md.renderer.rules.fence = (tokens, idx): string => {
     const token = tokens[idx];
     if (token === undefined) {
       return "";
@@ -82,4 +82,4 @@ const renderMarkdown = async (markdown: string): Promise<RenderResult> => {
   return { html, toc: [...currentTocItems] };
 };
 
-export default renderMarkdown;
+export { renderMarkdown };

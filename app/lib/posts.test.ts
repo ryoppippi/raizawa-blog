@@ -47,7 +47,7 @@ describe("posts", () => {
 
   it("posts should be sorted by createdAt descending", () => {
     const posts = getAllPosts();
-    for (let idx = 1; idx < posts.length; idx++) {
+    for (let idx = 1; idx < posts.length; idx += 1) {
       const prev = posts[idx - 1];
       const curr = posts[idx];
       if (prev !== undefined && curr !== undefined) {

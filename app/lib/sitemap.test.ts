@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { SITE_URL } from "./config";
-import { type PostMeta, getAllPosts, getCategories, getTags, getTotalPages } from "./posts";
+import { getAllPosts, getCategories, getTags, getTotalPages } from "./posts";
+import type { PostMeta } from "./posts";
 
 const SECOND_PAGE = 2;
 

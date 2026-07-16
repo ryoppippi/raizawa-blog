@@ -1,7 +1,8 @@
 import { createRoute } from "honox/factory";
 import { SITE_URL } from "../lib/config";
 import { HTTP_OK } from "../lib/http";
-import { type PostMeta, getAllPosts, getCategories, getTags, getTotalPages } from "../lib/posts";
+import { getAllPosts, getCategories, getTags, getTotalPages } from "../lib/posts";
+import type { PostMeta } from "../lib/posts";
 
 const SECOND_PAGE = 2;
 

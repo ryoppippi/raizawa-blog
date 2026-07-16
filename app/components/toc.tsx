@@ -1,5 +1,5 @@
-import { type Child } from "hono/jsx";
-import { type TocItem } from "../lib/toc";
+import type { Child, FC } from "hono/jsx";
+import type { TocItem } from "../lib/toc";
 
 const MIN_TOC_ITEMS = 2;
 const H2_LEVEL = 2;
@@ -37,7 +37,7 @@ const indentClass = (level: number): string => {
   return "";
 };
 
-const TocList = ({ items }: { items: TocItem[] }) => (
+const TocList: FC<{ items: TocItem[] }> = ({ items }) => (
   <nav>
     <ul class="menu menu-sm">
       {items
@@ -53,7 +53,7 @@ const TocList = ({ items }: { items: TocItem[] }) => (
   </nav>
 );
 
-const MobileToc = ({ items }: { items: TocItem[] }) => (
+const MobileToc: FC<{ items: TocItem[] }> = ({ items }) => (
   <details class="collapse collapse-arrow bg-base-100 shadow-sm mb-6 lg:hidden">
     <summary class="collapse-title font-bold">目次</summary>
     <div class="collapse-content">
@@ -64,7 +64,7 @@ const MobileToc = ({ items }: { items: TocItem[] }) => (
 
 const TOC_DRAWER_ID = "toc-drawer";
 
-const TocLayout = ({ items, children }: { items: TocItem[]; children: Child }) => {
+const TocLayout: FC<{ items: TocItem[]; children: Child }> = ({ items, children }) => {
   if (!shouldShowToc(items)) {
     return <>{children}</>;
   }

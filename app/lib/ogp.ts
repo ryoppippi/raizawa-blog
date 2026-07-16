@@ -67,7 +67,7 @@ const fetchPageHTML = async (url: string): Promise<string> => {
     throw new Error(`HTTP ${response.status}`);
   }
 
-  return response.text();
+  return await response.text();
 };
 
 // Extract OGP data from HTML content

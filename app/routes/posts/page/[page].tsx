@@ -1,8 +1,8 @@
 import { ssgParams } from "hono/ssg";
 import { createRoute } from "honox/factory";
-import Layout from "../../../components/layout";
-import Pagination from "../../../components/pagination";
-import PostList from "../../../components/post-list";
+import { Layout } from "../../../components/layout";
+import { Pagination } from "../../../components/pagination";
+import { PostList } from "../../../components/post-list";
 import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "../../../lib/config";
 import { getPostsForPage, getTotalPages } from "../../../lib/posts";
 
@@ -12,7 +12,7 @@ export default createRoute(
   ssgParams(() => {
     const totalPages = getTotalPages();
     const pages = [];
-    for (let pageNum = SECOND_PAGE; pageNum <= totalPages; pageNum++) {
+    for (let pageNum = SECOND_PAGE; pageNum <= totalPages; pageNum += 1) {
       pages.push({ page: String(pageNum) });
     }
     return pages;

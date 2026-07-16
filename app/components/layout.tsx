@@ -1,4 +1,4 @@
-import { type Child } from "hono/jsx";
+import type { Child, FC } from "hono/jsx";
 import { Link } from "honox/server";
 import { FAVICON_URL, SITE_TITLE } from "../lib/config";
 
@@ -25,7 +25,7 @@ interface LayoutProps {
   children: Child;
 }
 
-const HamburgerIcon = () => (
+const HamburgerIcon: FC = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
@@ -54,7 +54,7 @@ const headerScrollScript = `{
   }
 }`;
 
-export default function Layout({
+const Layout: FC<LayoutProps> = ({
   title,
   description,
   ogType = "website",
@@ -62,7 +62,7 @@ export default function Layout({
   jsonLd,
   wide = false,
   children,
-}: LayoutProps) {
+}) => {
   const containerClass = containerWidth(wide);
 
   return (
@@ -134,4 +134,6 @@ export default function Layout({
       </body>
     </html>
   );
-}
+};
+
+export { Layout };

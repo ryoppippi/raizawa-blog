@@ -1,12 +1,10 @@
+import type { FC } from "hono/jsx";
 import { isSameDay, toLocalDate } from "../lib/date";
 
-export default function UpdatedAt({
-  createdAt,
-  updatedAt,
-}: {
+const UpdatedAt: FC<{
   createdAt: string;
   updatedAt: string;
-}) {
+}> = ({ createdAt, updatedAt }) => {
   if (isSameDay(createdAt, updatedAt)) {
     return <></>;
   }
@@ -16,4 +14,6 @@ export default function UpdatedAt({
       (更新: <time>{toLocalDate(updatedAt)}</time>)
     </span>
   );
-}
+};
+
+export { UpdatedAt };

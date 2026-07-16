@@ -21,30 +21,41 @@
     "app/lib/posts-data.ts",
     "app/lib/posts-data.d.ts",
   ],
-  // Rule categories - strict base configuration
+  // Rule categories - maximum strictness: ALL categories enabled as error
   // - correctness (196 rules): Catch definite bugs and errors
   // - suspicious (47 rules): Flag potentially problematic patterns
   // - pedantic (106 rules): Stricter code quality checks (includes no-throw-literal, require-await, ban-ts-comment, etc.)
   // - perf (11 rules): Performance-related issues
   // - style (168 rules): Code style rules
-  // Note: restriction category should be enabled per-rule basis
+  // - restriction (68 rules): Ban entire language constructs; incompatible rules are opted out below with rationale
+  // - nursery (8 rules): Experimental rules, still enabled for maximum strictness
   "categories": {
     "correctness": "error",
     "suspicious": "error",
     "pedantic": "error",
     "perf": "error",
     "style": "error",
+    "restriction": "error",
+    "nursery": "error",
   },
   "rules": {
     // ===================
-    // Restriction Rules (not in categories, must be explicit)
+    // Restriction rules opted out (each bans a construct this project relies on)
     // ===================
-    // Disallow console usage in production code
-    "no-console": "error",
-    // Disallow empty blocks
-    "no-empty": "error",
-    // Disallow empty functions
-    "no-empty-function": "error",
+    // async/await is the async model of this SSG codebase; the rule targets generator-based codebases
+    "oxc/no-async-await": "off",
+    // Optional chaining (ES2020) is supported by all build/runtime targets (env is es2024)
+    "oxc/no-optional-chaining": "off",
+    // Object rest/spread (ES2018) is supported by all targets
+    "oxc/no-rest-spread-properties": "off",
+    // `undefined` is the idiomatic absence value in TypeScript (optional props, `?? undefined`);
+    // the rule guards against pre-ES5 environments where `undefined` was mutable
+    "no-undefined": "off",
+    // Direct opposite of no-default-export (both live in restriction); named exports win
+    "import/prefer-default-export": "off",
+    // Always `return await` for better stack traces; also satisfies require-await
+    // in async delegation functions required by promise-function-async
+    "typescript/return-await": ["error", "always"],
     // ===================
     // Override category defaults with custom options
     // ===================
@@ -84,13 +95,14 @@
     "typescript/no-floating-promises": "error",
     // Error on awaiting non-thenable values
     "typescript/await-thenable": "error",
-    // Enforce `import type` with inline style
+    // Enforce `import type` with separate style
+    // (inline style conflicts with restriction rule no-import-type-side-effects)
     "typescript/consistent-type-imports": [
       "error",
       {
         "prefer": "type-imports",
         "disallowTypeAnnotations": false,
-        "fixStyle": "inline-type-imports",
+        "fixStyle": "separate-type-imports",
       },
     ],
     // Disallow unnecessary type arguments
@@ -141,8 +153,11 @@
     // ===================
     // Allow up to 15 dependencies for route files with many component imports
     "import/max-dependencies": ["error", { "max": 15 }],
-    // Enforce inline type specifier style (compatible with no-duplicates)
-    "import/consistent-type-specifier-style": ["error", "prefer-inline"],
+    // Enforce top-level `import type` style (compatible with no-import-type-side-effects)
+    "import/consistent-type-specifier-style": ["error", "prefer-top-level"],
+    // Separate `import type` lines are required by consistent-type-specifier-style,
+    // so they must not count as duplicates
+    "no-duplicate-imports": ["error", { "allowSeparateTypeImports": true }],
     // Ensure imports are at the top
     "import/first": "error",
     // Disallow duplicate imports
@@ -193,6 +208,29 @@
     ],
   },
   "overrides": [
+    {
+      // HonoX file-based routing requires default exports in routes and the server entry
+      "files": ["app/routes/**", "app/server.ts"],
+      "rules": {
+        "import/no-default-export": "off",
+      },
+    },
+    {
+      // Ambient declaration files have no imports/exports by nature
+      "files": ["**/*.d.ts"],
+      "rules": {
+        "import/unambiguous": "off",
+      },
+    },
+    {
+      // hono/jsx element type includes Promise<HtmlEscapedString>, so these rules
+      // would force every JSX component to be async and change render semantics
+      "files": ["**/*.tsx"],
+      "rules": {
+        "typescript/promise-function-async": "off",
+        "typescript/return-await": "off",
+      },
+    },
     {
       // HonoX server entry point has type inference issues with createApp
       "files": ["app/server.ts"],

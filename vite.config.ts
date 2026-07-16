@@ -4,7 +4,7 @@ import { defaultExtensionMap } from "hono/ssg";
 import honox from "honox/vite";
 import ssg from "@hono/vite-ssg";
 import tailwindcss from "@tailwindcss/vite";
-import gitTimestampsPlugin from "./app/lib/vite-plugin-git-timestamps";
+import { gitTimestampsPlugin } from "./app/lib/vite-plugin-git-timestamps";
 
 const entry = "./app/server.ts";
 

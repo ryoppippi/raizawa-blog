@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import renderMarkdown from "./markdown";
+import { renderMarkdown } from "./markdown";
 
 const EXPECTED_LINE_COUNT = 3;
 
