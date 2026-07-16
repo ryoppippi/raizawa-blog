@@ -127,6 +127,9 @@ const Layout: FC<LayoutProps> = ({
               <li>
                 <a href="/tag">タグ</a>
               </li>
+              <li>
+                <a href="/search">検索</a>
+              </li>
             </ul>
           </div>
         </div>

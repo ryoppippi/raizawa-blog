@@ -5,7 +5,7 @@
   "module": "index.ts",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --mode client && vite build",
+    "build": "vite build --mode client && vite build && pagefind --site dist",
     "preview": "vite preview",
     "test": "vitest run",
     "lint": "oxlint --type-check -c .oxlintrc.jsonc --type-aware app/",
@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "@hono/vite-ssg": "^0.3.2",
+    "pagefind": "^1.5.2",
     "vite": "^7.3.1",
     "vitest": "^4.0.16"
   }

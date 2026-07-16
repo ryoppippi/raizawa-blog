@@ -52,6 +52,7 @@ export default createRoute(
         next={next}
         linkPrefix="/posts/"
         ogUrl={`${SITE_URL}/posts/${fullSlug}`}
+        pagefindBody
       />,
     );
   },

@@ -70,8 +70,8 @@ const PostNav = ({
   );
 };
 
-const PostHeader = ({ meta }: { meta: PostMeta }) => (
-  <header class="card bg-base-100 shadow-sm mb-6">
+const PostHeader = ({ meta, pagefindBody }: { meta: PostMeta; pagefindBody: boolean }) => (
+  <header class="card bg-base-100 shadow-sm mb-6" data-pagefind-body={pagefindBody ? "" : undefined}>
     <div class="card-body p-6">
       <h1 class="text-2xl sm:text-3xl font-bold">{meta.title}</h1>
       <div class="text-sm opacity-70 mt-1">
@@ -104,11 +104,12 @@ interface PostDetailProps {
   linkPrefix: string;
   next: PostMeta | undefined;
   ogUrl: string;
+  pagefindBody?: boolean;
   post: Post;
   prev: PostMeta | undefined;
 }
 
-const PostDetail = ({ linkPrefix, next, ogUrl, post, prev }: PostDetailProps) => {
+const PostDetail = ({ linkPrefix, next, ogUrl, pagefindBody = false, post, prev }: PostDetailProps) => {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
@@ -129,8 +130,11 @@ const PostDetail = ({ linkPrefix, next, ogUrl, post, prev }: PostDetailProps) =>
       wide={shouldShowToc(post.toc)}
     >
       <TocLayout items={post.toc}>
-        <PostHeader meta={post.meta} />
-        <article class="card bg-base-100 shadow-sm">
+        <PostHeader meta={post.meta} pagefindBody={pagefindBody} />
+        <article
+          class="card bg-base-100 shadow-sm"
+          data-pagefind-body={pagefindBody ? "" : undefined}
+        >
           <div
             class="card-body p-6 prose-article"
             dangerouslySetInnerHTML={{ __html: post.html }}
