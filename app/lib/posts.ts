@@ -125,7 +125,7 @@ const getAllPosts = (): PostMeta[] => {
   return postsMetaCache;
 };
 
-const getPostBySlug = async (slug: string): Promise<Post | undefined> => {
+const loadPost = async (slug: string): Promise<Post | undefined> => {
   const path = `../posts/${slug}.md`;
   const content = markdownFiles[path];
 
@@ -139,6 +139,22 @@ const getPostBySlug = async (slug: string): Promise<Post | undefined> => {
   const { html, toc } = await renderMarkdown(markdownContent);
 
   return { content: markdownContent, html, meta, toc };
+};
+
+// Rendered-post cache: each post is emitted at /posts/:slug, /tag/:t/posts/:slug,
+// /category/:c/posts/:slug and llms-full.txt, but only needs one Shiki/markdown render.
+// Caching the promise dedupes concurrent renders during the SSG build.
+const renderedPostCache = new Map<string, Promise<Post | undefined>>();
+
+const getPostBySlug = async (slug: string): Promise<Post | undefined> => {
+  const cached = renderedPostCache.get(slug);
+  if (cached !== undefined) {
+    return await cached;
+  }
+
+  const loading = loadPost(slug);
+  renderedPostCache.set(slug, loading);
+  return await loading;
 };
 
 const getPostsByCategory = (category: string): PostMeta[] => {
