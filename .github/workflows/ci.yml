@@ -35,12 +35,16 @@ jobs:
           name: dist
           path: dist/
 
+      # wrangler-actionはbun.lockを見てbunで動こうとするが、このジョブに
+      # bunは要らない(ビルドはchecks側で済んでいる)。wranglerはプロジェクトの
+      # 依存でもないので、ランナーに最初からあるnpmで取ってくれば足りる
       - name: Deploy to Cloudflare Workers (Production)
         if: github.event_name == 'push'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          packageManager: npm
 
       - name: Deploy to Cloudflare Workers (Preview)
         if: github.event_name == 'pull_request'
@@ -49,6 +53,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          packageManager: npm
           command: deploy --env preview
 
       - name: Comment preview URL on PR
