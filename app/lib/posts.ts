@@ -226,7 +226,7 @@ const getPostsForPage = (page: number): PostMeta[] => {
   return posts.slice(start, end);
 };
 
-export type { AdjacentPosts, Post, PostMeta, SlugParts, TocItem };
+export type { Post, PostMeta };
 export {
   getAdjacentPosts,
   getAllPosts,
@@ -239,5 +239,4 @@ export {
   getTotalPages,
   isValidParam,
   parseSlugParts,
-  POSTS_PER_PAGE,
 };
