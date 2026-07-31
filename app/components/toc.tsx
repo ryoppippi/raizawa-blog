@@ -1,4 +1,5 @@
 import type { Child, FC } from "hono/jsx";
+import { HandBox, HandStamp, HandUnderline } from "./paper";
 import type { TocItem } from "../lib/toc";
 
 const MIN_TOC_ITEMS = 2;
@@ -7,22 +8,29 @@ const H3_LEVEL = 3;
 const H3_INDENT = "pl-4";
 const H4_INDENT = "pl-8";
 
+/*
+ * 現在地の印。
+ * 裸のブロックの直下で return すると「Illegal return statement」でスクリプトごと落ちるので、
+ * 早期脱出ではなく条件で包む。rootMargin は px と % しか取らない（rem は無効値で例外）。
+ * 目次はデスクトップとモバイルで2つ描かれるので、印は querySelectorAll で両方に付ける。
+ */
 const scrollspyScript = `{
   const tocLinks = document.querySelectorAll('.toc-link');
   const headings = document.querySelectorAll('article h2[id], article h3[id], article h4[id]');
-  if (tocLinks.length === 0 || headings.length === 0) return;
-
-  const observer = new IntersectionObserver((entries) => {
-    for (const entry of entries) {
-      if (entry.isIntersecting) {
-        tocLinks.forEach(link => link.classList.remove('active'));
-        const activeLink = document.querySelector('.toc-link[href="#' + entry.target.id + '"]');
-        if (activeLink) activeLink.classList.add('active');
+  if (tocLinks.length > 0 && headings.length > 0) {
+    const topGap = window.matchMedia('(min-width: 1024px)').matches ? '0px' : '-80px';
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          tocLinks.forEach((link) => { link.classList.remove('active'); });
+          const selector = '.toc-link[href="#' + CSS.escape(entry.target.id) + '"]';
+          document.querySelectorAll(selector).forEach((link) => { link.classList.add('active'); });
+        }
       }
-    }
-  }, { rootMargin: (window.matchMedia('(min-width: 1024px)').matches ? '0px' : '-5rem') + ' 0px -80% 0px' });
+    }, { rootMargin: topGap + ' 0px -80% 0px' });
 
-  headings.forEach(h => observer.observe(h));
+    headings.forEach((heading) => { observer.observe(heading); });
+  }
 }`;
 
 const shouldShowToc = (items: TocItem[]): boolean => items.length >= MIN_TOC_ITEMS;
@@ -37,56 +45,93 @@ const indentClass = (level: number): string => {
   return "";
 };
 
-const TocList: FC<{ items: TocItem[] }> = ({ items }) => (
-  <nav>
-    <ul class="menu menu-sm">
-      {items
-        .filter((item) => item.level >= H2_LEVEL)
-        .map((item) => (
-          <li class={indentClass(item.level)} key={item.id}>
-            <a href={`#${item.id}`} class="toc-link">
-              {item.text}
-            </a>
-          </li>
-        ))}
-    </ul>
+/*
+ * 目次の行。現在地はエンジの手書き下線で示すので、罫線もマーカーも引かない。
+ * 下線は active のときだけ CSS で見せる（.toc-link > svg）ため、
+ * 出し分けを JS に持たせず全部の行に置いてある。
+ */
+const TocLinks: FC<{ items: TocItem[] }> = ({ items }) => (
+  <>
+    {items
+      .filter((item) => item.level >= H2_LEVEL)
+      .map((item) => (
+        <a class={`toc-link ${indentClass(item.level)}`} href={`#${item.id}`} key={item.id}>
+          {item.text}
+          <HandUnderline />
+        </a>
+      ))}
+  </>
+);
+
+/* サイドの目次。デスクトップのみ */
+const TocNav: FC<{ items: TocItem[] }> = ({ items }) => (
+  <nav class="flex flex-col gap-3" aria-label="目次">
+    <span class="label">contents</span>
+    <TocLinks items={items} />
   </nav>
 );
 
-const MobileToc: FC<{ items: TocItem[] }> = ({ items }) => (
-  <details class="collapse collapse-arrow bg-base-100 shadow-sm mb-6 lg:hidden">
-    <summary class="collapse-title font-bold">目次</summary>
-    <div class="collapse-content">
-      <TocList items={items} />
-    </div>
-  </details>
+/*
+ * 深緑のベタ面に黄土のゴム印。
+ * 目次と同じ sticky の器に載るものなので、別ファイルには分けていない。
+ */
+const Subscribe: FC = () => (
+  <div class="bg-green px-[15px] py-[14px] text-[#e8e2d0]">
+    <span class="mb-2 block font-label text-[12.5px] tracking-[0.18em] text-ochre">subscribe</span>
+    <p class="mb-[10px] text-[13px] leading-[1.95]">更新は rss で。右下の折り目からも辿れる。</p>
+    <a href="/feed.xml">
+      <HandStamp fill="ochre">rss ↗</HandStamp>
+    </a>
+  </div>
 );
 
-const TOC_DRAWER_ID = "toc-drawer";
-
-const TocLayout: FC<{ items: TocItem[]; children: Child }> = ({ items, children }) => {
+/*
+ * モバイルの目次。本文の上に折りたたむ。
+ * daisyUI の collapse をやめて <details> にしたのは、開閉に JS も追加の状態も要らないため。
+ * HandBox の中身は inline なので、幅いっぱいの2列にするために直下の span を flex にしている。
+ */
+const MobileToc: FC<{ items: TocItem[] }> = ({ items }) => {
   if (!shouldShowToc(items)) {
-    return <>{children}</>;
+    return <></>;
   }
   return (
-    <>
-      <div class="drawer drawer-end lg:drawer-open">
-        <input id={TOC_DRAWER_ID} type="checkbox" class="drawer-toggle" />
-        <div class="drawer-content">
-          <MobileToc items={items} />
-          {children}
-        </div>
-        <div class="drawer-side z-30">
-          <label for={TOC_DRAWER_ID} aria-label="close table of contents" class="drawer-overlay" />
-          <div class="bg-base-200 min-h-full w-60 p-4">
-            <h2 class="font-bold mb-2 text-sm">目次</h2>
-            <TocList items={items} />
-          </div>
-        </div>
-      </div>
-      <script dangerouslySetInnerHTML={{ __html: scrollspyScript }} />
-    </>
+    <details class="group mb-5 lg:hidden">
+      <summary class="flex min-h-11 cursor-pointer list-none items-center [&::-webkit-details-marker]:hidden">
+        <HandBox class="block w-full px-[14px] py-3 [&>span]:flex [&>span]:w-full [&>span]:items-center [&>span]:justify-between">
+          <>
+            <span>contents</span>
+            <span class="text-[16px]">
+              <span class="group-open:hidden">＋</span>
+              <span class="hidden group-open:inline">−</span>
+            </span>
+          </>
+        </HandBox>
+      </summary>
+      <nav class="flex flex-col gap-3 px-[14px] pt-4" aria-label="目次">
+        <TocLinks items={items} />
+      </nav>
+    </details>
   );
 };
 
-export { shouldShowToc, TocLayout };
+/*
+ * 記事の2カラム。本文 + 224px のサイド。
+ * サイドは目次が無い記事にも出す（subscribe だけが残る）。
+ * 見出しの数で紙の形が変わると、記事を渡り歩いたときに別のサイトに見えるため。
+ */
+const TocLayout: FC<{ children: Child; items: TocItem[] }> = ({ children, items }) => (
+  <>
+    <div class="sheet grid grid-cols-1 gap-x-[42px] gap-y-9 pt-[26px] pb-12 lg:grid-cols-[minmax(0,1fr)_224px]">
+      <div class="min-w-0">{children}</div>
+      <aside class="hidden lg:block">
+        <div class="sticky top-[76px] flex flex-col gap-[22px]">
+          {shouldShowToc(items) && <TocNav items={items} />}
+          <Subscribe />
+        </div>
+      </aside>
+    </div>
+    {shouldShowToc(items) && <script dangerouslySetInnerHTML={{ __html: scrollspyScript }} />}
+  </>
+);
+
+export { MobileToc, shouldShowToc, TocLayout };

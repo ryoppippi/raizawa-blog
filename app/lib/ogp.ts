@@ -128,7 +128,8 @@ const getAltText = (title: string, url: string): string => {
 const generateOGPCard = (ogp: OGPData): string => {
   const { description, image, siteName, title, url } = ogp;
 
-  let imageHtml = `<span class="ogp-image ogp-noimage">NO IMAGE</span>`;
+  // 検索の抜粋に「NO IMAGE」が並ぶので、飾りの文字は索引から外す
+  let imageHtml = `<span class="ogp-image ogp-noimage" data-pagefind-ignore>NO IMAGE</span>`;
   if (image !== "") {
     const altText = getAltText(title, url);
     imageHtml = `<span class="ogp-image"><img src="${image}" alt="${altText}" /></span>`;

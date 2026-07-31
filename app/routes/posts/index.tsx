@@ -1,30 +1,35 @@
 import { createRoute } from "honox/factory";
 import { Layout } from "../../components/layout";
 import { Pagination } from "../../components/pagination";
-import { PostList } from "../../components/post-list";
+import { PostList, PostsAside, PostsHeading } from "../../components/post-list";
 import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "../../lib/config";
-import { getPostsForPage, getTotalPages } from "../../lib/posts";
+import { getAllPosts, getPostsForPage, getTotalPages } from "../../lib/posts";
+
+const FIRST_PAGE = 1;
 
 export default createRoute((c) => {
-  const currentPage = 1;
-  const posts = getPostsForPage(currentPage);
+  const posts = getPostsForPage(FIRST_PAGE);
   const totalPages = getTotalPages();
 
   return c.render(
     <Layout
       title={`ブログ記事一覧 - ${SITE_TITLE}`}
       description={SITE_DESCRIPTION}
+      nav="posts"
       ogUrl={`${SITE_URL}/posts`}
     >
-      <header class="card bg-base-100 shadow-sm mb-6">
-        <div class="card-body p-6">
-          <h1 class="text-2xl sm:text-3xl font-bold">ブログ記事一覧</h1>
-        </div>
-      </header>
-      <main>
-        <PostList posts={posts} />
-        <Pagination currentPage={currentPage} totalPages={totalPages} />
-      </main>
+      <div class="sheet grid gap-10 pt-6 pb-10 lg:grid-cols-[1fr_240px] lg:pt-8 lg:pb-[46px]">
+        <main class="min-w-0">
+          <PostsHeading
+            currentPage={FIRST_PAGE}
+            totalPages={totalPages}
+            totalPosts={getAllPosts().length}
+          />
+          <PostList posts={posts} />
+          <Pagination currentPage={FIRST_PAGE} totalPages={totalPages} />
+        </main>
+        <PostsAside />
+      </div>
     </Layout>,
   );
 });

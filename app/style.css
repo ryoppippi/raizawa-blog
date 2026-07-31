@@ -1,290 +1,641 @@
 @import "tailwindcss" source("../app");
-@plugin "daisyui";
 
-html {
-  scroll-behavior: smooth;
-}
+/*
+ * 紙のデザイン。
+ * 決まりごと（design_handoff_paper_blog/README.md より）:
+ *   1. 紙は上質紙1種。地・ヘッダー・コードの紙まで同じテクスチャ。
+ *   2. 和文は Klee One だけ。ラテン・数字は EB Garamond、署名だけ Parisienne。
+ *   3. UIの色は深緑だけ。黄土とエンジは「手で書き込んだ部分」にしか使わない。
+ *   4. 囲みはすべてボールペン。四角枠は カテゴリ / note / rss / 現在ページ の4か所だけ。
+ *   5. 角丸は使わない。ダークモードは作らない。
+ */
 
 @theme {
-  /* Golden Ratio (phi = 1.618) Design Tokens */
+  /* --- 色 --- */
+  --color-paper: #f6f1e4; /* 紙（地・ヘッダー） */
+  --color-paper-2: #fdfaf1; /* 紙（二次面・行のホバー） */
+  --color-paper-print: #fdfcf7; /* 印刷して貼った紙（コードブロック） */
+  --color-photo: #ffffff; /* 写真の白フチ */
+  --color-desk: #ddd7c6; /* 紙の外側 */
 
-  /* Spacing: base = 1rem */
-  --spacing-phi-1: 0.236rem; /* 1/phi^3 */
-  --spacing-phi-2: 0.382rem; /* 1/phi^2 */
-  --spacing-phi-3: 0.618rem; /* 1/phi   */
-  --spacing-phi-4: 1rem; /* base    */
-  --spacing-phi-5: 1.618rem; /* phi     */
-  --spacing-phi-6: 2.618rem; /* phi^2   */
-  --spacing-phi-7: 4.236rem; /* phi^3   */
-  --spacing-phi-8: 6.854rem; /* phi^4   */
+  --color-ink: #332f26; /* 本文 */
+  --color-ink-strong: #1c1a15; /* 見出し・強い文字 */
+  --color-ink-body: #4d4638; /* 抜粋・二次的な本文 */
+  --color-ink-soft: #7b7566; /* 弱い文字・キャプション */
+  --color-ink-faint: #a99f88; /* さらに弱い・数値の添え */
+  --color-ink-print: #2b2721; /* コードのインク */
 
-  /*
-   * Font Size
-   * --line-height values are intentionally hardcoded rather than referencing
-   * --leading-phi / --leading-phi-tight via var(). Reasons:
-   *   1. @theme is processed at build time; var() is resolved at runtime,
-   *      so Tailwind may not pick up the values for utility generation.
-   *   2. These are mathematical constants derived from phi — they won't drift.
-   *   3. Not all sizes share the same line-height (1.272, 1.15 have no
-   *      corresponding --leading-* token), so var() would be partial at best.
-   */
-  --text-phi-sm: 0.618rem;
-  --text-phi-sm--line-height: 1.618;
-  --text-phi-base: 1rem;
-  --text-phi-base--line-height: 1.618;
-  --text-phi-lg: 1.272rem; /* sqrt(phi) */
-  --text-phi-lg--line-height: 1.382;
-  --text-phi-xl: 1.618rem; /* phi       */
-  --text-phi-xl--line-height: 1.382;
-  --text-phi-2xl: 2.058rem; /* phi^1.5   */
-  --text-phi-2xl--line-height: 1.272;
-  --text-phi-3xl: 2.618rem; /* phi^2     */
-  --text-phi-3xl--line-height: 1.272;
-  --text-phi-4xl: 3.33rem; /* phi^2.5   */
-  --text-phi-4xl--line-height: 1.15;
+  --color-green: #1f3d2b; /* UIの唯一の色 */
+  --color-green-soft: #4d5a49;
+  --color-green-softer: #5d6b58;
 
-  /* Border Radius */
-  --radius-phi-sm: 0.382rem;
-  --radius-phi-md: 0.618rem;
-  --radius-phi-lg: 1rem;
-  --radius-phi-xl: 1.618rem;
+  --color-crimson: #8c1c2b; /* 手書きの書き込み専用 */
+  --color-ochre: #c8952f; /* 手書きのハイライト専用 */
 
-  /* Line Height */
-  --leading-phi: 1.618;
-  --leading-phi-tight: 1.382;
+  /* --- 書体 --- */
+  --font-jp: "Klee One", serif;
+  --font-label: "EB Garamond", serif;
+  --font-sign: "Parisienne", cursive;
+  --font-mono: "JetBrains Mono", ui-monospace, sfmono-regular, monospace;
+
+  /* --- 字の大きさ ---
+   * 和文（Klee One）とラテン（EB Garamond）は字面が違うので、
+   * 並べる時はラテン側を +1〜1.5px 上げた値をそのまま持っている。 */
+  --text-tag: 0.6875rem; /* 11px  #タグ */
+  --text-code: 0.78125rem; /* 12.5px コード */
+  --text-meta: 0.8125rem; /* 13px  ラベル・キャプション */
+  --text-meta-lg: 0.84375rem; /* 13.5px 日付 */
+  --text-label: 0.875rem; /* 14px  UIラベル */
+  --text-body-sm: 0.90625rem; /* 14.5px 補足の本文 */
+  --text-body: 0.96875rem; /* 15.5px 本文 */
+  --text-body--line-height: 2.15;
+  --text-lead: 1.0625rem; /* 17px  一覧タイトル */
+  --text-h4: 1.0625rem; /* 17px */
+  --text-h3: 1.1875rem; /* 19px */
+  --text-h2: 1.5rem; /* 24px */
+  --text-h1: 2.125rem; /* 34px */
+  --text-h1-sm: 1.625rem; /* 26px モバイルの h1 */
+
+  /* --- 余白 --- */
+  --spacing-sheet: 46px; /* 紙の左右 padding（デスクトップ） */
+  --spacing-sheet-sm: 20px; /* 同（モバイル） */
+
+  /* --- 影 --- */
+  --shadow-photo: 0 8px 20px rgb(43 39 33 / 0.16);
+  --shadow-photo-lg: 0 10px 26px rgb(43 39 33 / 0.18);
+  --shadow-photo-hover: 0 14px 30px rgb(43 39 33 / 0.2);
+  --shadow-stack: 0 1px 0 #f2ecdd, 0 3px 0 #e9e2cf, 2px 12px 26px rgb(43 39 33 / 0.22);
+
+  /* --- 動き --- */
+  --ease-paper: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* 角丸は使わない */
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
 }
 
-/* Article content styles */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-jp);
+    font-size: var(--text-body);
+    line-height: 2.15;
+    /* 紙にアンチエイリアスの膨らみは要らない */
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: var(--color-green);
+    text-decoration: none;
+  }
+  a:hover {
+    color: var(--color-crimson);
+  }
+
+  ::selection {
+    background: rgb(200 149 47 / 0.34);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-crimson);
+    outline-offset: 2px;
+  }
+}
+
 @layer components {
-  .prose-article h1 {
-    @apply text-phi-3xl font-bold mt-phi-6 mb-phi-4;
+  /* ============================================================
+   * 紙
+   * ============================================================ */
+
+  /* ページの器。テクスチャの親になるので position: relative が要る */
+  .paper-sheet {
+    @apply relative w-full;
   }
+
+  /* 紙の地。#paper フィルターを multiply で1枚敷く。
+   * これが content より下に来るよう、中身側は .paper-layer を付ける */
+  .paper-texture {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    filter: url("#paper");
+    mix-blend-mode: multiply;
+    opacity: 0.55;
+    pointer-events: none;
+  }
+
+  /*
+   * テクスチャより上に載せるための持ち上げ。
+   * z-index は付けない。付けると積み重ね文脈ができて、この中のライトボックスが
+   * sticky ヘッダーの下に潜る。position だけでテクスチャ(z-0)より後ろに描かれる
+   */
+  .paper-layer {
+    @apply relative;
+  }
+
+  /* 紙全体の横幅。記事は 1080px 相当、狭い画面は左右 20px */
+  .sheet {
+    @apply mx-auto w-full max-w-[1080px] px-5 lg:px-[46px];
+  }
+  .sheet-narrow {
+    @apply mx-auto w-full max-w-[760px] px-5 lg:px-[46px];
+  }
+
+  /* ============================================================
+   * 文字の役
+   * ============================================================ */
+
+  /* posts / photos / contents のような小文字英語のラベル */
+  .label {
+    @apply font-label text-meta tracking-[0.18em] text-ink-soft;
+  }
+  .label-date {
+    @apply font-label text-meta-lg tracking-[0.14em] text-ink-soft;
+  }
+  /* 見出しの posts / tags / search */
+  .label-heading {
+    @apply font-label text-[29px] font-semibold tracking-[0.04em] text-ink-strong;
+  }
+
+  /* 1ページ1回だけの署名 */
+  .signature {
+    @apply font-sign text-[30px] leading-none text-green;
+    filter: url("#ink");
+  }
+
+  /* ============================================================
+   * 手書き（SVG は components/paper.tsx が描く。ここは器だけ）
+   * ============================================================ */
+
+  /* 手書きの四角で囲んだラベル。カテゴリ / note / rss / 現在ページの4か所だけ
+   * 行間は本文の 2.15 を継がせない。継ぐと囲みが縦に伸びて紙のラベルに見えない */
+  .hand-box {
+    @apply relative inline-block px-[13px] py-[5px] font-label text-label leading-[1.4] tracking-[0.08em] text-green;
+  }
+  /*
+   * SVG は置換要素なので、inset:0 だけでは viewBox の縦横比から自然サイズが決まり、
+   * 器からはみ出す。幅と高さを明示して器に貼り付ける
+   */
+  .hand-box > svg {
+    @apply pointer-events-none absolute inset-0 h-full w-full overflow-visible;
+  }
+  .hand-box > span {
+    @apply relative;
+  }
+
+  /* 手書きの下線（現在地）。文字の下に潜り込ませる */
+  .hand-underline {
+    @apply relative;
+  }
+  .hand-underline > svg {
+    @apply pointer-events-none absolute inset-x-0 -bottom-[5px] h-[10px] w-full overflow-visible;
+  }
+
+  /* 手書きの罫線。幅に追従させるので preserveAspectRatio="none" 前提 */
+  .hand-rule {
+    @apply pointer-events-none block h-[9px] w-full overflow-visible;
+  }
+
+  /* 黄土のハイライト・エンジの下線（本文の書き込み） */
+  .mark-highlight {
+    @apply relative inline-block px-[3px];
+  }
+  .mark-highlight > svg {
+    @apply pointer-events-none absolute -inset-[2px];
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+  }
+  .mark-highlight > span {
+    @apply relative;
+  }
+
+  /* ============================================================
+   * 写真
+   * ============================================================ */
+
+  /* 白フチ。下にキャプションを置く時は padding-bottom を 0 にする */
+  .photo-frame {
+    @apply relative bg-photo p-[11px] pb-0;
+    box-shadow: var(--shadow-photo-lg);
+    transition:
+      transform 0.28s var(--ease-paper),
+      box-shadow 0.28s;
+  }
+  .photo-frame-sm {
+    @apply relative bg-photo p-[3px];
+    box-shadow: 0 2px 7px rgb(43 39 33 / 0.14);
+  }
+  a:hover > .photo-frame,
+  .photo-frame-hover:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 38px rgb(43 39 33 / 0.22);
+  }
+
+  /*
+   * 写真に乗せる粒・繊維・インク溜まり。図解とスクショ（.plain）には掛けない。
+   * viewBox を持たない svg は幅高さを書かないと 300x150 で止まるので、器に合わせる
+   */
+  .photo-grain,
+  .photo-fiber,
+  .photo-well {
+    @apply pointer-events-none absolute inset-0 h-full w-full;
+  }
+  .photo-grain {
+    opacity: 0.46;
+    mix-blend-mode: multiply;
+  }
+  .photo-fiber {
+    opacity: 0.17;
+    mix-blend-mode: screen;
+  }
+  .photo-well {
+    box-shadow: inset 0 0 50px rgb(38 36 30 / 0.2);
+  }
+
+  .photo-caption {
+    @apply flex items-center justify-between px-1 pt-[9px] pb-[11px] font-label text-meta tracking-[0.16em] text-ink-soft;
+  }
+
+  /* ============================================================
+   * 一覧
+   * ============================================================ */
+
+  /* 日付｜カテゴリ｜タイトル｜#タグ の1行 */
+  .post-row {
+    @apply flex items-center gap-4 px-[14px] py-[14px] text-ink;
+    transition:
+      background 0.2s,
+      transform 0.2s;
+  }
+  .post-row:hover {
+    background: rgb(253 250 241 / 0.9);
+    transform: translateX(3px);
+    color: var(--color-ink);
+  }
+
+  /* ============================================================
+   * 本文
+   * ============================================================ */
+
+  .prose-article {
+    @apply text-body text-ink;
+  }
+
+  .prose-article p {
+    @apply my-0 mb-5;
+  }
+
   .prose-article h2 {
-    @apply text-phi-2xl font-bold mt-phi-5 mb-phi-3;
+    @apply mt-[34px] mb-4 flex items-center gap-3 text-h2 font-semibold tracking-[0.03em] text-ink-strong;
   }
+  /* h2 の頭のエンジの棒。手で引いた線の代わりの短い印 */
+  .prose-article h2::before {
+    content: "";
+    @apply inline-block h-[3px] w-5 shrink-0 bg-crimson;
+  }
+
   .prose-article h3 {
-    @apply text-phi-xl font-bold mt-phi-4 mb-phi-2;
+    @apply mt-8 mb-3 text-h3 font-semibold text-ink-strong;
   }
   .prose-article h4 {
-    @apply text-phi-lg font-bold mt-phi-3 mb-phi-2;
-  }
-
-  .prose-article blockquote {
-    @apply border-l-4 border-base-300 pl-phi-4 my-phi-4 text-base-content/70;
-  }
-
-  .prose-article table {
-    @apply w-full my-phi-4 border-collapse;
-  }
-  .prose-article th,
-  .prose-article td {
-    @apply border border-base-300 p-phi-2 text-left;
-  }
-  .prose-article th {
-    @apply bg-base-200;
-  }
-
-  .prose-article ul {
-    @apply pl-phi-5 my-phi-4 list-disc;
-  }
-  .prose-article ol {
-    @apply pl-phi-5 my-phi-4 list-decimal;
-  }
-  .prose-article li {
-    @apply my-phi-1;
-  }
-  .prose-article p {
-    @apply my-phi-4;
+    @apply mt-6 mb-2 text-h4 font-semibold text-ink-strong;
   }
 
   .prose-article a {
-    @apply link link-primary;
+    @apply text-green underline decoration-[rgb(31_61_43_/_0.35)] underline-offset-[5px];
+  }
+  .prose-article a:hover {
+    @apply text-crimson decoration-[rgb(140_28_43_/_0.5)];
   }
 
+  .prose-article ul {
+    @apply my-5 list-disc pl-6;
+  }
+  .prose-article ol {
+    @apply my-5 list-decimal pl-6;
+  }
+  .prose-article li {
+    @apply my-1;
+  }
+  .prose-article li::marker {
+    @apply text-green;
+  }
+
+  /* 引用はペン1本の縦線 */
+  .prose-article blockquote {
+    @apply my-6 border-l-2 border-[rgb(31_61_43_/_0.3)] pl-5 text-ink-body;
+  }
+
+  .prose-article table {
+    @apply my-6 w-full border-collapse text-body-sm;
+  }
+  .prose-article th,
+  .prose-article td {
+    @apply border border-[rgb(31_61_43_/_0.2)] px-3 py-2 text-left;
+  }
+  .prose-article th {
+    @apply bg-paper-2 font-semibold;
+  }
+
+  /* インラインコードは地の文より少し小さくして馴染ませる（背景は敷かない） */
   .prose-article code:not(pre code) {
-    @apply bg-base-200 px-phi-2 py-phi-1 rounded text-sm font-mono text-error;
+    @apply font-mono text-[13px] text-crimson;
+  }
+
+  .prose-article hr {
+    @apply my-9 border-0 border-t border-[rgb(31_61_43_/_0.22)];
   }
 
   .prose-article .heading-wrapper {
-    display: flex;
-    align-items: baseline;
+    @apply flex items-baseline;
   }
   .prose-article .heading-wrapper .header-anchor {
-    @apply ml-2 text-base-content/30 no-underline;
-    opacity: 0;
-    transition: opacity 0.2s;
+    @apply ml-2 font-label text-ink-faint no-underline opacity-0 transition-opacity;
   }
   .prose-article .heading-wrapper:hover .header-anchor,
   .prose-article .header-anchor:focus {
-    opacity: 1;
+    @apply opacity-100;
   }
-}
 
-/* Code block styles (Shiki) */
-pre.shiki {
-  position: relative;
-  counter-reset: line;
-  overflow-x: auto;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-}
-
-.code-block-wrapper {
-  @apply relative;
-}
-
-.code-block-wrapper .copy-button {
-  @apply absolute top-2 right-2 z-10 opacity-0 transition-opacity;
-}
-
-.code-block-wrapper:hover .copy-button {
-  @apply opacity-100;
-}
-
-.copy-button.copied {
-  @apply btn-success;
-}
-
-.code-title {
-  background: #1f2428;
-  color: #e1e4e8;
-  padding: 0.5rem 1rem;
-  font-size: 0.85rem;
-  border-bottom: 1px solid #444d56;
-  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-}
-
-pre.shiki .line::before {
-  counter-increment: line;
-  content: counter(line);
-  display: inline-block;
-  width: 2rem;
-  margin-right: 1rem;
-  text-align: right;
-  color: #6a737d;
-  user-select: none;
-}
-
-pre.shiki .line.diff.add {
-  background-color: rgba(46, 160, 67, 0.2);
-}
-pre.shiki .line.diff.add::before {
-  content: "+";
-  color: #3fb950;
-}
-
-pre.shiki .line.diff.remove {
-  background-color: rgba(248, 81, 73, 0.2);
-}
-pre.shiki .line.diff.remove::before {
-  content: "-";
-  color: #f85149;
-}
-
-pre.shiki .line.highlighted {
-  background-color: rgba(56, 139, 253, 0.15);
-}
-pre.shiki .line.highlighted.error {
-  background-color: rgba(248, 81, 73, 0.2);
-}
-pre.shiki .line.highlighted.warning {
-  background-color: rgba(210, 153, 34, 0.2);
-}
-
-/* OGP card styles */
-.ogp-card {
-  @apply flex bg-base-100 border border-base-300 rounded-lg overflow-hidden my-6 no-underline shadow-md transition-shadow;
-  min-height: 120px;
-}
-.ogp-card:hover {
-  @apply shadow-xl no-underline;
-}
-.ogp-image {
-  @apply flex items-center justify-center shrink-0 w-48 h-36 overflow-hidden bg-base-300;
-}
-.ogp-image img {
-  @apply w-full h-full object-cover;
-}
-.ogp-noimage {
-  @apply text-base-content/50 text-sm;
-}
-.ogp-content {
-  @apply flex-1 p-4 flex flex-col justify-center;
-}
-.ogp-title {
-  @apply block text-lg font-semibold mb-2 text-base-content;
-}
-.ogp-description {
-  @apply block text-sm text-base-content/70 mb-2 overflow-hidden text-ellipsis whitespace-nowrap;
-}
-.ogp-site {
-  @apply block text-xs text-base-content/50;
-}
-
-/* Auto-hide header on scroll (desktop only) */
-@media (min-width: 1024px) {
-  #header-wrapper[data-scrolled] {
-    opacity: 0;
-    pointer-events: none;
+  /* 本文の図版。白フチ＋キャプション（左：説明／右：ファイル名） */
+  .prose-article figure {
+    @apply mx-0 my-0 mb-[26px];
   }
-  /* Thin hover zone at viewport top to detect cursor */
-  #header-wrapper::before {
+  .prose-article figure > .photo-frame {
+    @apply p-[10px] pb-0;
+  }
+  .prose-article figure img {
+    @apply block h-auto w-full;
+  }
+  .prose-article figcaption {
+    @apply flex justify-between gap-4 px-[3px] pt-[9px] pb-[11px] text-[12.5px] leading-normal text-ink-soft;
+  }
+  /* 図解・スクリーンショットは素のまま（文字が読めなくなる） */
+  .prose-article figure.plain .photo-grain,
+  .prose-article figure.plain .photo-fiber,
+  .prose-article figure.plain .photo-well {
+    @apply hidden;
+  }
+
+  /* ::: note — 手書きのボールペン枠。付箋（紙を貼る表現）は不採用 */
+  .prose-article .note {
+    @apply relative my-8 px-[22px] py-[18px] text-body-sm leading-[2.05] text-[#4a4028];
+  }
+  .prose-article .note > svg {
+    @apply pointer-events-none absolute inset-0 h-full w-full overflow-visible;
+  }
+  .prose-article .note > * {
+    @apply relative;
+  }
+  .prose-article .note::before {
+    content: "note";
+    @apply mb-2 block font-label text-meta-lg tracking-[0.14em] text-green;
+  }
+  .prose-article .note p:last-child {
+    @apply mb-0;
+  }
+
+  /* ============================================================
+   * コードブロック（印刷して貼った紙）
+   * 暗いターミナル配色は使わない。紙に暗い矩形が乗ると浮く。
+   * ============================================================ */
+
+  .code-block-wrapper {
+    @apply relative mb-[34px] bg-paper-print pb-[10px];
+    transform: rotate(-0.5deg);
+    box-shadow: var(--shadow-stack);
+  }
+  /* 貼った紙にも同じ紙目を敷く（地よりは薄く） */
+  .code-block-wrapper::before {
     content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1rem;
-    pointer-events: auto;
+    @apply pointer-events-none absolute inset-0 z-0;
+    filter: url("#paper");
+    mix-blend-mode: multiply;
+    opacity: 0.4;
   }
-  #header-wrapper[data-scrolled]:hover,
-  #header-wrapper:focus-within {
-    opacity: 1;
-    pointer-events: auto;
+
+  /* ファイル名と copy の行。破線で区切る */
+  .code-head {
+    @apply relative z-1 flex items-center justify-between px-[14px] pt-[9px] pb-2 font-mono text-[11px] text-[#6f6656];
+    border-bottom: 1px dashed rgb(43 39 33 / 0.22);
   }
-}
-
-/* Heading scroll offset for anchor links (mobile only, header stays visible) */
-@media (max-width: 1023px) {
-  .prose-article h2[id],
-  .prose-article h3[id],
-  .prose-article h4[id] {
-    scroll-margin-top: 5rem; /* navbar(4rem) + margin(1rem) */
+  .copy-button {
+    @apply cursor-pointer font-mono text-[11px] text-crimson;
   }
-}
+  .copy-button:hover {
+    @apply text-green;
+  }
+  .copy-button.copied {
+    @apply text-green;
+  }
 
-/* TOC active link */
-.toc-link.active {
-  @apply font-bold text-primary;
-}
+  pre.shiki {
+    @apply relative z-1 m-0 overflow-x-auto p-[14px] text-code leading-[1.9];
+    counter-reset: line;
+    background: transparent !important;
+  }
 
-/* Post navigation */
-.post-nav {
-  @apply flex justify-between mt-8 pt-6 border-t border-base-300;
-}
-.post-nav a {
-  @apply link link-primary max-w-[45%];
-}
-.post-nav-prev {
-  @apply text-left;
-}
-.post-nav-next {
-  @apply text-right ml-auto;
-}
+  pre.shiki .line::before {
+    counter-increment: line;
+    content: counter(line);
+    @apply mr-4 inline-block w-6 text-right text-ink-faint select-none;
+  }
 
-/* Mobile styles */
-@media (max-width: 640px) {
+  pre.shiki .line.diff.add {
+    background: rgb(31 61 43 / 0.1);
+  }
+  pre.shiki .line.diff.add::before {
+    content: "+";
+    @apply text-green;
+  }
+  pre.shiki .line.diff.remove {
+    background: rgb(140 28 43 / 0.1);
+  }
+  pre.shiki .line.diff.remove::before {
+    content: "-";
+    @apply text-crimson;
+  }
+  pre.shiki .line.highlighted {
+    background: rgb(200 149 47 / 0.18);
+  }
+  pre.shiki .line.highlighted.error {
+    background: rgb(140 28 43 / 0.14);
+  }
+  pre.shiki .line.highlighted.warning {
+    background: rgb(200 149 47 / 0.24);
+  }
+
+  /* ============================================================
+   * OGP カード（本文に貼るリンクカード）
+   * カードとシャドウをやめて、罫線1本の引用に寄せる
+   * ============================================================ */
+
   .ogp-card {
-    @apply flex-col;
+    @apply my-6 flex items-stretch gap-4 border border-[rgb(31_61_43_/_0.22)] bg-paper-2 no-underline;
+    min-height: 96px;
+    transition:
+      background 0.2s,
+      transform 0.2s;
+  }
+  .ogp-card:hover {
+    @apply no-underline;
+    background: rgb(253 250 241 / 0.9);
+    transform: translateX(3px);
   }
   .ogp-image {
-    @apply w-full h-44;
+    @apply flex h-[108px] w-40 shrink-0 items-center justify-center self-center overflow-hidden bg-photo p-[4px];
   }
-  pre.shiki .line::before {
+  .ogp-image img {
+    @apply h-full w-full object-cover;
+  }
+  .ogp-noimage {
+    @apply font-label text-meta text-ink-faint;
+  }
+  .ogp-content {
+    @apply flex flex-1 flex-col justify-center gap-1 py-3 pr-4;
+  }
+  .ogp-title {
+    @apply block text-[15px] leading-relaxed font-semibold text-ink-strong;
+  }
+  .ogp-description {
+    @apply block overflow-hidden text-[13px] leading-normal text-ellipsis whitespace-nowrap text-ink-body;
+  }
+  .ogp-site {
+    @apply block font-label text-meta tracking-[0.14em] text-ink-soft;
+  }
+
+  /* ============================================================
+   * 目次
+   * ============================================================ */
+
+  .toc-link {
+    @apply relative self-start text-label text-[#6b6455];
+  }
+  .toc-link.active {
+    @apply text-ink-strong;
+  }
+  /* 現在地はエンジの手書き下線。罫線は引かない */
+  .toc-link > svg {
+    @apply pointer-events-none absolute inset-x-0 -bottom-[4px] h-[10px] w-full overflow-visible opacity-0;
+  }
+  .toc-link.active > svg {
+    @apply opacity-100;
+  }
+
+  /* ============================================================
+   * 右下の折り目（ドッグイヤー）
+   * ホバーが無いモバイルでは使わない
+   * ============================================================ */
+
+  .dogear {
+    @apply pointer-events-none fixed right-0 bottom-0 z-30 hidden h-[110px] w-[110px] lg:block;
+  }
+  .dogear-fold {
+    @apply absolute inset-0 cursor-pointer;
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    background: linear-gradient(45deg, #f6f1e4 0%, #e9e2cf 60%, #d2c9b0 100%);
+    box-shadow: -5px -5px 12px rgb(43 39 33 / 0.16);
+    transform-origin: 100% 100%;
+    transition: transform 0.45s var(--ease-paper);
+    pointer-events: auto;
+  }
+  .dogear-back {
+    @apply absolute right-3 bottom-3 flex flex-col items-end gap-1 opacity-0 transition-opacity duration-300;
+  }
+  .dogear-back a {
+    @apply pointer-events-auto font-label text-label tracking-[0.14em] text-green;
+  }
+  .dogear:hover .dogear-fold,
+  .dogear:focus-within .dogear-fold {
+    transform: rotate(10deg) scale(0.4);
+  }
+  .dogear:hover .dogear-back,
+  .dogear:focus-within .dogear-back {
+    @apply opacity-100 delay-150;
+  }
+
+  /* ============================================================
+   * ライトボックス
+   * ============================================================ */
+
+  .lightbox {
+    @apply fixed inset-0 z-50 hidden items-center justify-center;
+    background: rgb(28 32 26 / 0.62);
+    backdrop-filter: blur(14px) saturate(0.9);
+  }
+  .lightbox[open],
+  .lightbox.is-open {
+    @apply flex;
+  }
+  .lightbox img {
+    @apply max-h-[82vh] max-w-[86vw] bg-photo p-2;
+    box-shadow: 0 24px 60px rgb(0 0 0 / 0.45);
+  }
+  .lightbox-bar {
+    @apply absolute bottom-8 flex items-center gap-4 px-5 py-2 font-label text-label text-paper;
+    background: rgb(246 241 228 / 0.16);
+    box-shadow: inset 0 0 0 1px rgb(246 241 228 / 0.28);
+  }
+  .lightbox-bar button {
+    @apply cursor-pointer text-paper;
+  }
+  .lightbox-close {
+    @apply absolute top-6 right-6 flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-full text-paper;
+    background: rgb(246 241 228 / 0.16);
+  }
+}
+
+/* 本文の見出しがヘッダーに隠れないように */
+.prose-article :is(h2, h3, h4)[id] {
+  scroll-margin-top: 5rem;
+}
+
+/* 印刷では紙のオーバーレイを外す。インクを重ねても紙は出ない */
+@media print {
+  .paper-texture,
+  .photo-grain,
+  .photo-fiber,
+  .photo-well,
+  .dogear,
+  .code-block-wrapper::before {
+    display: none !important;
+  }
+  .code-block-wrapper {
+    transform: none;
+    box-shadow: none;
+    border: 1px solid rgb(43 39 33 / 0.3);
+  }
+  body {
+    background: #fff;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .paper-texture,
+  .photo-grain,
+  .photo-fiber {
     display: none;
   }
-  pre.shiki {
-    font-size: 0.8rem;
+  .photo-frame,
+  .post-row,
+  .dogear-fold,
+  .ogp-card {
+    transition: none;
+  }
+  a:hover > .photo-frame,
+  .photo-frame-hover:hover,
+  .post-row:hover,
+  .ogp-card:hover {
+    transform: none;
   }
 }
