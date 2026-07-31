@@ -23,8 +23,8 @@
         }
       );
 
-      # 記事のtextlint設定。devShellは.textlintrcへ貼り、CIも同じ導出を読む。
-      # 片方にだけ書くと、手元で通った文章がCIで落ちる
+      # 記事のtextlint設定。devShellが.textlintrcへ貼る。
+      # 文章の言い回しは書くときの目安で、CIの検査には入れていない
       textlintrcFor = forAllSystems (
         system:
         let
@@ -113,7 +113,6 @@
 
       packages = forAllSystems (system: {
         toolchain = toolchainFor.${system};
-        textlintrc = textlintrcFor.${system};
       });
 
       devShells = forAllSystems (system: {

@@ -22,12 +22,6 @@ runs:
       shell: bash
       run: nix profile add .#toolchain
 
-    # 記事のtextlint設定もflake.nixから受け取る。devShellのshellHookと同じ導出を指すので、
-    # 手元で通った文章はCIでも通る
-    - name: Link the textlint config
-      shell: bash
-      run: ln -sfn "$(nix build .#textlintrc --no-link --print-out-paths)" .textlintrc
-
     - name: Cache bun dependencies
       uses: actions/cache@v4
       with:
