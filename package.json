@@ -14,7 +14,6 @@
     "format": "nix fmt",
     "format:check": "nix fmt -- --fail-on-change",
     "new-post": "bun run scripts/new-post.ts",
-    "post-check": "textlint app/posts/**/*.md && typos app/posts/",
     "verify": "bun run format:check && bun run lint && bun run typecheck && bun run knip && bun run test"
   },
   "dependencies": {
