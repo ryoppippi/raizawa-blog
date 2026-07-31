@@ -29,5 +29,5 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
   },
-  "include": ["app/**/*", "vite.config.ts"]
+  "include": ["app/**/*", "scripts/**/*", "test/**/*", "vite.config.ts"]
 }

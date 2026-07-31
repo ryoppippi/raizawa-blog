@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
-import { readFileSync } from "fs";
-import { join } from "path";
+import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { matter } from "gray-matter-es";
 import { renderMarkdown } from "../app/lib/markdown";
 
@@ -8,7 +8,7 @@ const fixturesDir = join(process.cwd(), "test/fixtures");
 
 describe("markdown rendering with fixtures", () => {
   it("should render test-post.md correctly", async () => {
-    const content = readFileSync(join(fixturesDir, "test-post.md"), "utf-8");
+    const content = readFileSync(join(fixturesDir, "test-post.md"), "utf8");
     const { content: markdown } = matter(content);
 
     const { html } = await renderMarkdown(markdown);
@@ -36,5 +36,5 @@ describe("markdown rendering with fixtures", () => {
     // Check OGP cards
     expect(html).toContain("ogp-card");
     expect(html).toContain("github.com");
-  }, 60000);
+  }, 60_000);
 });
