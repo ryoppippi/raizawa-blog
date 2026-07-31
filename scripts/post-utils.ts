@@ -1,21 +1,17 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 
 const PAD_WIDTH = 2;
 
-const POSTS_DIR = join(import.meta.dir, "../app/posts");
-const TEMPLATES_DIR = join(import.meta.dir, "templates");
+// Bun独自のimport.meta.dirはTSの型にない。同じ値をESM標準のURLから得る
+const SCRIPTS_DIR = fileURLToPath(new URL(".", import.meta.url));
+const POSTS_DIR = join(SCRIPTS_DIR, "../app/posts");
+const TEMPLATES_DIR = join(SCRIPTS_DIR, "templates");
 
 const getTemplates = (): string[] => {
   const files = readdirSync(TEMPLATES_DIR);
   return files.filter((file) => file.endsWith(".md"));
-};
-
-const getLocalDateStr = (now: Date): string => {
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(PAD_WIDTH, "0");
-  const day = String(now.getDate()).padStart(PAD_WIDTH, "0");
-  return `${year}-${month}-${day}`;
 };
 
 interface GeneratedPath {

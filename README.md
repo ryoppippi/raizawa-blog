@@ -34,16 +34,28 @@ bun run dev
 bun run build
 ```
 
-## Test
+## Verify
+
+CI と同じ検査をまとめて走らせる。
 
 ```bash
-bun run test
+bun run verify
 ```
 
-## Lint
+内訳:
+
+| コマンド               | 見るもの                               |
+| ---------------------- | -------------------------------------- |
+| `bun run format:check` | treefmt (nixfmt / oxfmt / mdsf)        |
+| `bun run lint`         | oxlint (全カテゴリ error + 型情報付き) |
+| `bun run typecheck`    | tsgo --noEmit                          |
+| `bun run knip`         | 使われていない export・ファイル・依存  |
+| `bun run test`         | vitest                                 |
+
+記事の文章は CI では見ない。気になったときに目安として手元で叩く。
 
 ```bash
-bun run lint
+bun run post-check
 ```
 
 ## Format

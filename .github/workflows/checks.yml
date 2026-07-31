@@ -1,0 +1,65 @@
+name: Checks
+
+# PRでもデプロイでも同じ検査を通す。ここ一つに書いて両方から呼ぶ。
+# 片方にだけ足すと、通したつもりの検査がもう片方をすり抜ける
+on:
+  workflow_call:
+
+# 直列に並べると、いちばん遅い1つ(記事を全部レンダリングするビルド)の後ろに
+# 他が全部つながる。独立したジョブに分ければ待ち時間はいちばん遅いジョブの分だけになる
+jobs:
+  static:
+    name: Format / Lint / Types
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          cachix_auth_token: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - run: bun run format:check
+      - run: bun run lint
+      - run: bun run typecheck
+      # 使われていないexport・ファイル・依存。oxlintは1ファイルしか見ないので拾えない
+      - run: bun run knip
+
+  # NOTE: 記事のtextlint(bun run post-check)は意図的にここへ入れない。
+  # 言い回しは書くときの目安として手元で見たいだけで、
+  # 通らないと公開できない門番にはしない。コードの検査とは性質が違う
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # 記事の更新日はgit logから引く。浅いcloneでは履歴が無くテストが落ちる
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup
+        with:
+          cachix_auth_token: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - run: bun run test
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # testと同じ理由。vite-plugin-git-timestampsが全記事の履歴を辿る
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup
+        with:
+          cachix_auth_token: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - run: bun run build
+
+      # デプロイジョブはこれを受け取る。同じ成果物を配るので、
+      # 検査したものと配ったものが違う、ということが起きない
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 1

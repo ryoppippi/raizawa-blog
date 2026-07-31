@@ -20,6 +20,8 @@
     // Generated files
     "app/lib/posts-data.ts",
     "app/lib/posts-data.d.ts",
+    // Design handoff artifacts, not product code
+    "design_handoff_paper_blog",
   ],
   // Rule categories - maximum strictness: ALL categories enabled as error
   // - correctness (196 rules): Catch definite bugs and errors
@@ -209,10 +211,19 @@
   },
   "overrides": [
     {
-      // HonoX file-based routing requires default exports in routes and the server entry
-      "files": ["app/routes/**", "app/server.ts"],
+      // HonoX file-based routing requires default exports in routes and the server entry.
+      // Tool config files (vite, knip) are loaded the same way by their loaders
+      "files": ["app/routes/**", "app/server.ts", "vite.config.ts", "knip.config.ts"],
       "rules": {
         "import/no-default-export": "off",
+      },
+    },
+    {
+      // Config object keys follow each tool's documented order (build, plugins, entry, project).
+      // Alphabetising them makes the file harder to check against the upstream docs
+      "files": ["vite.config.ts", "knip.config.ts"],
+      "rules": {
+        "sort-keys": "off",
       },
     },
     {
@@ -249,6 +260,9 @@
         "typescript/no-floating-promises": "warn",
         "max-lines-per-function": "off",
         "no-await-in-loop": "off",
+        // A test body is a straight arrange/act/assert sequence; splitting it to
+        // satisfy a statement count hides what is being verified
+        "max-statements": "off",
       },
     },
     {
@@ -257,6 +271,10 @@
       "rules": {
         "no-console": "off",
         "unicorn/prefer-top-level-await": "error",
+        // A CLI reports failure through its exit status; there is no caller to throw to
+        "unicorn/no-process-exit": "off",
+        // $EDITOR is the interface for "which editor to open", set by the user's shell
+        "node/no-process-env": "off",
       },
     },
     {

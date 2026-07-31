@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    uses: ./.github/workflows/checks.yml
+    secrets: inherit
+
+  deploy:
+    needs: checks
+    runs-on: ubuntu-latest
+    # forkからのPRにはsecretsが渡らない。走らせても必ず失敗するので出さない
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: read
+      deployments: write
+      pull-requests: write
+    steps:
+      # 配布設定(wrangler.toml)だけ要る。ビルドはやり直さない
+      - uses: actions/checkout@v4
+
+      # checksのbuildジョブが作ったものをそのまま配る。ここで組み直すと、
+      # 検査したものと配ったものが別になる
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      # wrangler-actionはbun.lockを見てbunで動こうとするが、このジョブに
+      # bunは要らない(ビルドはchecks側で済んでいる)。wranglerはプロジェクトの
+      # 依存でもないので、ランナーに最初からあるnpmで取ってくれば足りる
+      - name: Deploy to Cloudflare Workers (Production)
+        if: github.event_name == 'push'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          packageManager: npm
+
+      - name: Deploy to Cloudflare Workers (Preview)
+        if: github.event_name == 'pull_request'
+        id: preview-deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          packageManager: npm
+          command: deploy --env preview
+
+      - name: Comment preview URL on PR
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # デプロイの実際の戻り値を使う。URLを手で書くと、名前を変えたときに嘘になる
+          PREVIEW_URL: ${{ steps.preview-deploy.outputs.deployment-url }}
+          PR_NUMBER: ${{ github.event.number }}
+        run: |
+          body="### Preview Deployment
+          Deployed to: ${PREVIEW_URL}"
+          gh pr comment "${PR_NUMBER}" --body "${body}" --edit-last 2>/dev/null ||
+            gh pr comment "${PR_NUMBER}" --body "${body}"

@@ -2,18 +2,20 @@
   "name": "raizawa-blog",
   "private": true,
   "type": "module",
-  "module": "index.ts",
   "scripts": {
     "dev": "vite",
     "build": "vite build --mode client && vite build && pagefind --site dist",
     "preview": "vite preview",
     "test": "vitest run",
-    "lint": "oxlint --type-check -c .oxlintrc.jsonc --type-aware app/",
-    "lint:fix": "oxlint -c .oxlintrc.jsonc --type-aware app/ --fix",
+    "lint": "oxlint --type-check -c .oxlintrc.jsonc --type-aware .",
+    "lint:fix": "oxlint --type-check -c .oxlintrc.jsonc --type-aware . --fix",
+    "typecheck": "tsgo --noEmit",
+    "knip": "knip",
     "format": "nix fmt",
     "format:check": "nix fmt -- --fail-on-change",
     "new-post": "bun run scripts/new-post.ts",
-    "post-check": "textlint app/posts/**/*.md && typos app/posts/"
+    "post-check": "textlint app/posts/**/*.md && typos app/posts/",
+    "verify": "bun run format:check && bun run lint && bun run typecheck && bun run knip && bun run test"
   },
   "dependencies": {
     "@shikijs/transformers": "^3.21.0",
@@ -30,6 +32,7 @@
   },
   "devDependencies": {
     "@hono/vite-ssg": "^0.3.2",
+    "knip": "^6.31.0",
     "pagefind": "^1.5.2",
     "vite": "^7.3.1",
     "vitest": "^4.0.16"

@@ -1,0 +1,35 @@
+name: Setup
+description: Install the toolchain described in flake.nix, plus project dependencies
+
+inputs:
+  cachix_auth_token:
+    description: Cachix auth token
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - uses: DeterminateSystems/nix-installer-action@v17
+
+    - uses: cachix/cachix-action@v15
+      with:
+        name: r-aizawa-nixos-configuration
+        authToken: ${{ inputs.cachix_auth_token }}
+
+    # 道具の一覧はflake.nixの`toolchain`が持つ。ここで名前を並べ直すと、
+    # devShellに足したのにCIで落ちる(あるいはその逆)という食い違いが起きる
+    - name: Install the toolchain
+      shell: bash
+      run: nix profile add .#toolchain
+
+    - name: Cache bun dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.bun/install/cache
+        key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-bun-
+
+    - name: Install dependencies
+      shell: bash
+      run: bun install --frozen-lockfile
