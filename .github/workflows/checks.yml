@@ -23,9 +23,9 @@ jobs:
       # 使われていないexport・ファイル・依存。oxlintは1ファイルしか見ないので拾えない
       - run: bun run knip
 
-  # NOTE: 記事のtextlint(bun run post-check)はまだここに入れていない。
-  # 既存記事に890件の指摘が残っており、今つなぐと初日から赤のままになる。
-  # 先に既存分を通してから足す
+  # NOTE: 記事のtextlint(bun run post-check)は意図的にここへ入れない。
+  # 言い回しは書くときの目安として手元で見たいだけで、
+  # 通らないと公開できない門番にはしない。コードの検査とは性質が違う
   test:
     name: Test
     runs-on: ubuntu-latest
