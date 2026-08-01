@@ -1,6 +1,6 @@
 import { createRoute } from "honox/factory";
 import { Layout } from "../components/layout";
-import { HandBox, HandRule } from "../components/paper";
+import { HandRule } from "../components/paper";
 import { SITE_TITLE, SITE_URL } from "../lib/config";
 import { toShortEnglishDate } from "../lib/date";
 import { getAllPosts } from "../lib/posts";
@@ -51,20 +51,17 @@ const SEARCH_SCRIPT = `{
     statusEl.hidden = text === '';
   };
 
+  /* 日付は幅64pxで揃え、抜粋はその下に80px字下げして置く（デザイン 5a） */
   const toHtml = (data) => {
     const meta = posts[slugOf(data.url)];
-    const head = meta === undefined
-      ? ''
-      : '<span class="flex items-center gap-[10px] font-label text-meta-lg text-ink-soft">'
-        + '<span class="text-green">' + escapeHtml(meta[0]) + '</span>'
-        + '<span>' + escapeHtml(meta[1]) + '</span>'
-        + '</span>';
-    return '<a class="post-row flex-col items-start gap-[6px] px-[14px] py-[13px]" href="'
-      + escapeHtml(data.url) + '">'
-      + head
-      + '<span class="text-lead font-semibold text-ink-strong">'
+    const date = meta === undefined ? '' : escapeHtml(meta[1]);
+    return '<a class="block pb-5" href="' + escapeHtml(data.url) + '">'
+      + '<span class="post-row">'
+      + '<time class="hidden lg:block">' + date + '</time>'
+      + '<span class="text-[18px] font-semibold text-ink-strong">'
       + escapeHtml(data.meta && data.meta.title ? data.meta.title : data.url) + '</span>'
-      + '<span class="text-[13.5px] leading-[1.95] text-ink-body">' + data.excerpt + '</span>'
+      + '</span>'
+      + '<span class="block text-[14px] text-ink-soft lg:pl-20">' + data.excerpt + '</span>'
       + '</a>';
   };
 
@@ -162,35 +159,79 @@ export default createRoute((c) =>
       <style dangerouslySetInnerHTML={{ __html: markStyle }} />
       <span id="search-index" data-posts={buildPostIndex()} hidden />
 
-      <main class="sheet-narrow pt-8 pb-14">
-        <h1 class="label-heading mb-5">search</h1>
+      <main class="body-col">
+        <h1 class="text-h2 font-semibold text-ink-strong" style="rotate: -0.3deg">
+          検索
+        </h1>
 
-        <HandBox class="mb-[10px] block w-full px-4 py-[13px]">
-          <span class="flex items-center gap-3">
-            <input
-              id="search-input"
-              type="text"
-              autocomplete="off"
-              aria-label="記事を検索"
-              placeholder="記事を検索"
-              class="min-w-0 flex-1 bg-transparent font-jp text-[15px] tracking-normal text-ink-strong outline-none placeholder:text-ink-faint"
+        {/*
+          入力欄は囲まない（決定事項メモ 4）。
+          ボールペンで速く二度書きした下線と、エンジのカーソルだけを置く
+        */}
+        <div class="relative mt-4 mb-[10px] flex max-w-[560px] items-center gap-1 px-3 py-[6px]">
+          <input
+            id="search-input"
+            type="text"
+            autocomplete="off"
+            aria-label="記事を検索"
+            placeholder="記事を検索"
+            class="min-w-0 flex-1 bg-transparent font-jp text-[18px] tracking-normal text-ink-strong outline-none placeholder:text-ink-faint"
+          />
+          <span class="h-[22px] w-[2px] shrink-0 bg-crimson" aria-hidden="true" />
+          <span
+            id="search-count"
+            class="shrink-0 font-label text-[13.5px] tracking-[0.1em] text-ink-soft"
+          />
+          <svg
+            class="pointer-events-none absolute inset-x-0 -bottom-[10px] h-[14px] overflow-visible"
+            viewBox="0 0 560 14"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M2 6.5 C 120 3.6, 300 4.2, 452 5.2 C 500 5.6, 536 6.4, 557 7.2"
+              fill="none"
+              stroke="#1f3d2b"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              vector-effect="non-scaling-stroke"
             />
-            <span id="search-count" class="label-date shrink-0" />
-          </span>
-        </HandBox>
+            <path
+              d="M8 11 C 140 8, 330 8.8, 470 9.8 C 510 10.2, 542 11, 552 11.6"
+              fill="none"
+              stroke="#1f3d2b"
+              stroke-width="1.4"
+              opacity=".8"
+              stroke-linecap="round"
+              vector-effect="non-scaling-stroke"
+            />
+            <path
+              d="M2 12.6 C 20 10.8, 44 10.2, 66 10.6"
+              fill="none"
+              stroke="#1f3d2b"
+              stroke-width="1.2"
+              opacity=".6"
+              stroke-linecap="round"
+              vector-effect="non-scaling-stroke"
+            />
+          </svg>
+        </div>
 
-        <p class="label-date mb-6">powered by pagefind ・ 全文検索</p>
+        <p class="pt-4 text-[13.5px] text-green" style="rotate: -1.2deg">
+          検索<span class="font-label text-[12.5px] italic">（search ・ pagefind）</span>
+          。書けばすぐ出る
+        </p>
         {/* 文言は和文なので EB Garamond ではなく本文と同じ手（Klee One）で出す */}
-        <p id="search-status" class="mb-6 text-body-sm text-ink-soft" hidden />
+        <p id="search-status" class="pt-4 text-ink-soft" hidden />
 
-        <div id="search-results" class="flex flex-col gap-[2px]" />
+        <div id="search-results" class="flex flex-col pt-8" />
 
         <div id="search-more" class="relative mt-5 pt-[14px]" hidden>
           <HandRule thin class="absolute inset-x-0 top-0" />
-          <span class="label-date">
-            さらに<span id="search-more-count">0</span>件 →{" "}
+          <span class="text-[14px] text-ink-soft">
+            さらに<span id="search-more-count">0</span>件{" "}
             <button type="button" id="search-more-button" class="cursor-pointer text-crimson">
-              show more
+              もっと出す
             </button>
           </span>
         </div>

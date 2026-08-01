@@ -63,8 +63,10 @@ export default createRoute((c) => {
       nav="tags"
       ogUrl={`${SITE_URL}/tag`}
     >
-      <main class="sheet-narrow pt-8 pb-14">
-        <h1 class="label-heading">tags</h1>
+      <main class="body-col">
+        <h1 class="text-h2 font-semibold text-ink-strong" style="rotate: -0.3deg">
+          タグ
+        </h1>
         <p class="mt-[6px] mb-[22px] text-[14px] leading-[2] text-ink-body">
           よく書いているものは字を大きく。数字は添えるだけにした。
         </p>

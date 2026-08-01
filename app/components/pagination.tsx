@@ -1,67 +1,50 @@
 import type { FC } from "hono/jsx";
-import { HandBox, HandStamp } from "./paper";
-import { getPageHref, getPageNumbers, getPrevHref } from "../lib/pagination";
+import { ShortArrow } from "./hand-arrows";
+import { getPageHref, getPrevHref } from "../lib/pagination";
 
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
 }
 
-/* モバイルのタップ領域は 44px。デスクトップでは行間が空きすぎるので詰める */
-const NUMBER_CLASS =
-  "inline-flex min-h-11 min-w-11 items-center justify-center text-green-soft lg:min-h-0 lg:min-w-0 lg:px-[11px] lg:py-1";
-
 /*
  * ページ送り。
- * 現在ページは深緑のゴム印、next だけ手書きの枠。数字は囲まない。
- * prev をエンジにしていないのは、書き込みの色が2か所に増えると next の枠が埋もれるため。
+ * 数字を並べるページャは紙に無いので、「つづきは次の紙」のペン書き1行にした。
+ * 何枚目かは括弧で添えるだけ。getPageNumbers は使わなくなったが、
+ * lib/pagination.ts はテストが持っているのでそのまま残してある。
  */
 const Pagination: FC<PaginationProps> = ({ currentPage, totalPages }) => {
-  const pageNumbers = getPageNumbers(currentPage, totalPages);
+  const hasPrev = currentPage > 1;
+  const hasNext = currentPage < totalPages;
+
+  if (!hasPrev && !hasNext) {
+    return <></>;
+  }
 
   return (
     <nav
-      class="mt-[22px] flex flex-wrap items-center justify-center gap-[6px] font-label text-[15px] tracking-[0.1em] lg:mt-[30px] lg:gap-2 lg:text-[14.5px]"
+      class="flex flex-wrap items-center justify-between gap-4 pt-8 text-[15px] text-crimson"
       aria-label="ページ送り"
     >
-      {currentPage > 1 && (
-        <a class={NUMBER_CLASS} href={getPrevHref(currentPage)}>
-          prev
+      {hasPrev && (
+        <a
+          class="inline-flex min-h-11 items-center lg:min-h-0"
+          href={getPrevHref(currentPage)}
+          style="rotate: 0.4deg"
+        >
+          {/* 同じ矢印を左右反転して戻り向きにする。逆向きの path を増やさない */}
+          <ShortArrow class="mx-1 -scale-x-100" />
+          前の紙へ戻る（{currentPage - 1}枚目 / {totalPages}枚）
         </a>
       )}
-      {pageNumbers.map((pageNum, index) => {
-        if (pageNum === "...") {
-          return (
-            <span key={`ellipsis-${index}`} class="px-1 text-ink-faint" aria-hidden="true">
-              …
-            </span>
-          );
-        }
-        const pageNumber = Number(pageNum);
-        if (pageNumber === currentPage) {
-          return (
-            <HandStamp
-              key={pageNumber}
-              class="inline-flex min-h-11 items-center justify-center px-[13px] text-[15px] text-paper lg:min-h-0 lg:px-[11px] lg:py-1 lg:text-[14.5px]"
-            >
-              <span aria-current="page">{pageNumber}</span>
-            </HandStamp>
-          );
-        }
-        return (
-          <a key={pageNumber} class={NUMBER_CLASS} href={getPageHref(pageNumber)}>
-            {pageNumber}
-          </a>
-        );
-      })}
-      {currentPage < totalPages && (
-        <a href={getPageHref(currentPage + 1)}>
-          <HandBox
-            class="inline-flex min-h-11 items-center justify-center px-[15px] text-[15px] text-crimson lg:min-h-0 lg:px-3 lg:py-1 lg:text-[14.5px]"
-            stroke="crimson"
-          >
-            next
-          </HandBox>
+      {hasNext && (
+        <a
+          class="ml-auto inline-flex min-h-11 items-center lg:min-h-0"
+          href={getPageHref(currentPage + 1)}
+          style="rotate: -0.5deg"
+        >
+          つづきは次の紙
+          <ShortArrow class="mx-1" />（{currentPage + 1}枚目 / {totalPages}枚）
         </a>
       )}
     </nav>

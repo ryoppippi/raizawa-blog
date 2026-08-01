@@ -1,8 +1,9 @@
 import type { Child, FC } from "hono/jsx";
 import { Link } from "honox/server";
-import { DogEar, PaperFilters, PaperTexture } from "./paper";
-import { MobileMenu, SiteHeader } from "./site-header";
+import { PaperFilters, PaperTexture } from "./paper";
+import { SiteHeader } from "./site-header";
 import type { NavKey } from "./site-header";
+import { MobileMenu, SiteIndex } from "./site-index";
 import { FAVICON_URL, NAV_TOGGLE_ID, SITE_TITLE } from "../lib/config";
 
 const GOOGLE_FONTS_HREF =
@@ -17,8 +18,15 @@ interface JsonLd {
 interface LayoutProps {
   children: Child;
   description: string;
+  /* ヘッダーのサイト名の右に添える走り書き */
+  headNote?: Child;
   jsonLd?: JsonLd;
-  /* ヘッダーの現在地 */
+  /*
+   * 見出し欄（赤線の左）。1ページ1役割なので、
+   * 渡さなければサイトの目次、渡せばその中身（記事詳細では記事の目次）に入れ替わる
+   */
+  marginCol?: Child;
+  /* 見出し欄の現在地 */
   nav?: NavKey;
   ogType?: "website" | "article";
   ogUrl: string;
@@ -49,7 +57,9 @@ const readingProgressScript = `{
 const Layout: FC<LayoutProps> = ({
   children,
   description,
+  headNote,
   jsonLd,
+  marginCol,
   nav,
   ogType = "website",
   ogUrl,
@@ -84,14 +94,15 @@ const Layout: FC<LayoutProps> = ({
     </head>
     <body class="min-h-screen">
       <PaperFilters />
-      <div class="paper-sheet min-h-screen">
+      <div class="paper-sheet">
         <PaperTexture />
+        <div class="binder-holes" aria-hidden="true" />
         {/* モバイルメニューの開閉。peer なので後ろの兄弟から peer-checked で参照する */}
         <input id={NAV_TOGGLE_ID} type="checkbox" class="peer sr-only" aria-hidden="true" />
-        <SiteHeader nav={nav} readingMinutes={readingMinutes} />
+        <SiteHeader headNote={headNote} readingMinutes={readingMinutes} />
         <MobileMenu nav={nav} />
-        <div class="paper-layer">{children}</div>
-        <DogEar />
+        {marginCol ?? <SiteIndex nav={nav} />}
+        <div class="paper-layer pb-16">{children}</div>
       </div>
       {readingMinutes !== undefined && (
         <script dangerouslySetInnerHTML={{ __html: readingProgressScript }} />

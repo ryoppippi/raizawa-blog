@@ -1,9 +1,9 @@
 import { createRoute } from "honox/factory";
 import { Layout } from "../../components/layout";
 import { Pagination } from "../../components/pagination";
-import { PostList, PostsAside, PostsHeading } from "../../components/post-list";
+import { PostList, PostsHeadNote } from "../../components/post-list";
 import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "../../lib/config";
-import { getAllPosts, getPostsForPage, getTotalPages } from "../../lib/posts";
+import { getPostsForPage, getTotalPages } from "../../lib/posts";
 
 const FIRST_PAGE = 1;
 
@@ -13,23 +13,17 @@ export default createRoute((c) => {
 
   return c.render(
     <Layout
-      title={`ブログ記事一覧 - ${SITE_TITLE}`}
       description={SITE_DESCRIPTION}
+      headNote={<PostsHeadNote currentPage={FIRST_PAGE} totalPages={totalPages} />}
       nav="posts"
       ogUrl={`${SITE_URL}/posts`}
+      title={`記事 - ${SITE_TITLE}`}
     >
-      <div class="sheet grid gap-10 pt-6 pb-10 lg:grid-cols-[1fr_240px] lg:pt-8 lg:pb-[46px]">
-        <main class="min-w-0">
-          <PostsHeading
-            currentPage={FIRST_PAGE}
-            totalPages={totalPages}
-            totalPosts={getAllPosts().length}
-          />
-          <PostList posts={posts} />
-          <Pagination currentPage={FIRST_PAGE} totalPages={totalPages} />
-        </main>
-        <PostsAside />
-      </div>
+      {/* 見出し欄（赤線の左）は Layout がサイトの目次を描くので、ここでは持たない */}
+      <main class="body-col">
+        <PostList posts={posts} />
+        <Pagination currentPage={FIRST_PAGE} totalPages={totalPages} />
+      </main>
     </Layout>,
   );
 });

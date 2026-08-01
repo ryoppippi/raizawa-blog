@@ -22,6 +22,7 @@
     "app/lib/posts-data.d.ts",
     // Design handoff artifacts, not product code
     "design_handoff_paper_blog",
+    "design_handoff_looseleaf",
   ],
   // Rule categories - maximum strictness: ALL categories enabled as error
   // - correctness (196 rules): Catch definite bugs and errors

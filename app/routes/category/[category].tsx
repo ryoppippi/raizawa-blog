@@ -23,10 +23,10 @@ export default createRoute(
       <Layout
         title={`${category} - ${SITE_TITLE}`}
         description={`${category}の記事一覧`}
-        nav="categories"
+        nav="tags"
         ogUrl={`${SITE_URL}/category/${category}`}
       >
-        <main class="sheet-narrow pt-8 pb-14">
+        <main class="body-col">
           {/* カテゴリの手書き囲みは記事の行の中で使う印なので、見出しでは重ねない */}
           <header class="relative flex items-baseline justify-between gap-4 pb-4">
             <h1 class="text-h2 font-semibold text-ink-strong">{category}</h1>

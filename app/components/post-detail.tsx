@@ -1,11 +1,11 @@
 import type { FC } from "hono/jsx";
 import { Layout } from "./layout";
 import { Lightbox } from "./lightbox";
-import { HandBox, HandRule, Signature } from "./paper";
-import { MobileToc, TocLayout } from "./toc";
-import { UpdatedAt } from "./updated-at";
+import { LongArrow } from "./hand-arrows";
+import { Signature } from "./paper";
+import { ArticleIndex, MobileToc, TocScript } from "./toc";
+import { PostMetaLine } from "./post-meta-line";
 import { SITE_TITLE, SITE_URL } from "../lib/config";
-import { toLongEnglishDate } from "../lib/date";
 import type { Post, PostMeta } from "../lib/posts";
 import { readingMinutes } from "../lib/reading-time";
 
@@ -22,19 +22,21 @@ const copyScript = `document.querySelectorAll('.copy-button').forEach(button => 
   });
 });`;
 
+/*
+ * 前後の記事へは紙の左右いっぱいに伸びる手書きの矢印で送る。
+ * ラベルは説明を付けず記事タイトルだけにする（決定事項メモ 6）
+ */
 const PrevPostLink: FC<{ linkPrefix: string; prev: PostMeta | undefined }> = ({
   linkPrefix,
   prev,
 }) => {
   if (prev === undefined) {
-    return <div class="hidden lg:block" />;
+    return <span />;
   }
   return (
-    <a class="group block min-h-11" href={`${linkPrefix}${prev.slug}`}>
-      <span class="mb-[6px] block font-label text-meta tracking-[0.16em] text-crimson">← prev</span>
-      <span class="block text-[15px] leading-[1.75] font-semibold text-ink-strong group-hover:text-crimson">
-        {prev.title}
-      </span>
+    <a class="paper-nav paper-nav-prev" href={`${linkPrefix}${prev.slug}`}>
+      <LongArrow direction="prev" />
+      <span>{prev.title}</span>
     </a>
   );
 };
@@ -44,14 +46,12 @@ const NextPostLink: FC<{ linkPrefix: string; next: PostMeta | undefined }> = ({
   next,
 }) => {
   if (next === undefined) {
-    return <></>;
+    return <span />;
   }
   return (
-    <a class="group block min-h-11 lg:text-right" href={`${linkPrefix}${next.slug}`}>
-      <span class="mb-[6px] block font-label text-meta tracking-[0.16em] text-crimson">next →</span>
-      <span class="block text-[15px] leading-[1.75] font-semibold text-ink-strong group-hover:text-crimson">
-        {next.title}
-      </span>
+    <a class="paper-nav paper-nav-next" href={`${linkPrefix}${next.slug}`}>
+      <LongArrow direction="next" />
+      <span>{next.title}</span>
     </a>
   );
 };
@@ -65,37 +65,21 @@ const PostNav: FC<{
     return <></>;
   }
   return (
-    <nav class="relative mt-9 grid grid-cols-1 gap-[14px] pt-5 lg:grid-cols-2">
-      <HandRule thin class="absolute inset-x-0 top-0" />
+    /* 本文カラムからはみ出して紙の幅いっぱいに置く */
+    <nav class="mt-11 flex items-start justify-between gap-6 max-lg:mx-0 lg:-ml-[var(--body-x)]">
       <PrevPostLink prev={prev} linkPrefix={linkPrefix} />
       <NextPostLink next={next} linkPrefix={linkPrefix} />
     </nav>
   );
 };
 
-/* カテゴリの手書き囲み ＋ `July 28, 2026 ・ updated 07/30`
- * 日付は検索の抜粋に `03/27.` のような断片として出てしまうので索引から外す */
-const PostMetaLine: FC<{ meta: PostMeta }> = ({ meta }) => (
-  <div class="mb-[14px] flex flex-wrap items-center gap-[10px]" data-pagefind-ignore="">
-    {meta.category !== "" && (
-      <a href={`/category/${meta.category}`}>
-        <HandBox>{meta.category}</HandBox>
-      </a>
-    )}
-    <span class="label-date">
-      <time>{toLongEnglishDate(meta.createdAt)}</time>
-      <UpdatedAt createdAt={meta.createdAt} updatedAt={meta.updatedAt} />
-    </span>
-  </div>
-);
-
-/* 囲みは カテゴリ / note / rss / 現在ページ の4か所だけなので、タグは字だけで並べる */
+/* 囲みは 現在地の楕円 / カテゴリ / note だけなので、タグは字だけで並べる */
 const PostTags: FC<{ tags: string[] }> = ({ tags }) => {
   if (tags.length === 0) {
     return <></>;
   }
   return (
-    <div class="mt-7 flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-tag">
+    <div class="mt-8 flex flex-wrap items-center gap-x-4 text-[13px] text-ink-soft">
       {tags.map((tag) => (
         <a class="text-ink-soft" href={`/tag/${tag}`} key={tag}>
           #{tag}
@@ -136,36 +120,39 @@ const PostDetail: FC<PostDetailProps> = ({
     <Layout
       description={`${post.meta.title} - ${SITE_TITLE}`}
       jsonLd={jsonLd}
+      /* 見出し欄は1ページ1役割。記事ではサイトのナビではなくこの記事の目次だけを置く */
+      marginCol={<ArticleIndex items={post.toc} />}
       nav="posts"
       ogType="article"
       ogUrl={ogUrl}
       readingMinutes={readingMinutes(post.content)}
       title={`${post.meta.title} - ${SITE_TITLE}`}
     >
-      <TocLayout items={post.toc}>
+      <div class="body-col">
         <header data-pagefind-body={pagefindBody || undefined}>
-          <PostMetaLine meta={post.meta} />
           {/* 滲みは SVG フィルターだけで出す。Blotter.js は WebGL 1枚分の依存が増えるので入れない */}
           <h1
-            class="mb-6 text-h1-sm leading-[1.5] font-semibold tracking-[0.02em] text-pretty text-ink-strong lg:text-h1"
-            style="filter: url(#ink)"
+            class="text-h1-sm leading-[var(--line)] font-semibold text-ink-strong lg:text-h1 lg:leading-[calc(var(--line)*2)]"
+            style="filter: url(#ink); rotate: -0.3deg"
           >
             {post.meta.title}
           </h1>
+          <PostMetaLine meta={post.meta} />
         </header>
         <MobileToc items={post.toc} />
         {/* 読了バーが offsetTop / offsetHeight を測る先。1ページに1つだけ置く */}
         <article
-          class="prose-article"
+          class="prose-article pt-[6px]"
           data-pagefind-body={pagefindBody || undefined}
           dangerouslySetInnerHTML={{ __html: post.html }}
         />
         <PostTags tags={post.meta.tags} />
         <PostNav linkPrefix={linkPrefix} next={next} prev={prev} />
-        <div class="mt-[22px] flex justify-end">
+        <div class="mt-6 flex justify-end">
           <Signature class="text-[26px] lg:text-[30px]" />
         </div>
-      </TocLayout>
+      </div>
+      <TocScript items={post.toc} />
       <Lightbox />
       <script dangerouslySetInnerHTML={{ __html: copyScript }} />
     </Layout>

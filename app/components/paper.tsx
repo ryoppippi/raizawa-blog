@@ -56,7 +56,6 @@ const PaperTexture: FC = () => <div class="paper-texture" aria-hidden="true" />;
 
 const INK = "#1f3d2b";
 const CRIMSON = "#8c1c2b";
-const OCHRE = "#c8952f";
 
 /*
  * 手書きの罫線。2本重ねの濃い線と薄い二度書き。
@@ -74,20 +73,6 @@ const ruleShapeOf = (alt: boolean): string => {
     return RULE_ALT;
   }
   return RULE_MAIN;
-};
-
-const strokeColorOf = (stroke: "green" | "crimson"): string => {
-  if (stroke === "crimson") {
-    return CRIMSON;
-  }
-  return INK;
-};
-
-const stampFillOf = (fill: "green" | "ochre"): string => {
-  if (fill === "ochre") {
-    return OCHRE;
-  }
-  return INK;
 };
 
 interface HandRuleProps {
@@ -147,96 +132,27 @@ const HandRule: FC<HandRuleProps> = ({ alt = false, thin = false, class: classNa
   );
 };
 
-/*
- * 手書きの四角。囲みは増やすほど騒がしくなるので、
- * カテゴリ / note / rss / 現在ページ の4か所だけに使う
- */
-const BOX_OUTER =
-  "M3 4 C 30 2, 68 3.4, 97 3 C 98.6 11, 98 22, 97.4 28.6 C 70 30, 32 29.4, 3.6 28.8 C 2 21, 2.2 11, 3 4 Z";
-const BOX_SECOND = "M6 5.4 C 34 3.6, 72 4.6, 95 4.2";
-/* 同じ形を塗りに使うとゴム印になる */
-const STAMP =
-  "M2.4 3 C 12 1.6, 24 2.6, 31.6 2.4 C 32.8 10, 32.4 21, 31.8 27 C 22 28.4, 11 27.8, 2.8 27.4 C 1.6 20, 1.6 10, 2.4 3 Z";
-
-interface HandBoxProps {
-  children: Child;
-  /* 枠の色。既定は深緑。next だけエンジ */
-  stroke?: "green" | "crimson";
-  class?: string;
-}
-
-/* 手書きの四角で囲んだラベル */
-const HandBox: FC<HandBoxProps> = ({ children, stroke = "green", class: className = "" }) => (
-  <span class={`hand-box ${className}`}>
-    <svg viewBox="0 0 100 32" preserveAspectRatio="none" aria-hidden="true">
-      <path
-        d={BOX_OUTER}
-        fill="none"
-        stroke={strokeColorOf(stroke)}
-        stroke-width="1.5"
-        stroke-linecap="round"
-        vector-effect="non-scaling-stroke"
-      />
-      <path
-        d={BOX_SECOND}
-        fill="none"
-        stroke={strokeColorOf(stroke)}
-        stroke-width=".9"
-        opacity=".45"
-        stroke-linecap="round"
-        vector-effect="non-scaling-stroke"
-      />
-    </svg>
-    <span>{children}</span>
-  </span>
-);
-
-/* 深緑のゴム印。現在ページと rss に使う */
-const HandStamp: FC<{ children: Child; fill?: "green" | "ochre"; class?: string }> = ({
-  children,
-  fill = "green",
-  class: className = "",
-}) => (
-  <span class={`hand-box ${className}`}>
-    <svg viewBox="0 0 34 30" preserveAspectRatio="none" aria-hidden="true">
-      <path d={STAMP} fill={stampFillOf(fill)} />
-    </svg>
-    <span>{children}</span>
-  </span>
-);
-
-/* エンジの手書き下線。現在地を示す */
+/* エンジの手書き下線。現在地と本文の書き込みに使う */
 const HandUnderline: FC<{ class?: string }> = ({ class: className = "" }) => (
-  <svg
-    class={className}
-    height="10"
-    viewBox="0 0 40 10"
-    preserveAspectRatio="none"
-    aria-hidden="true"
-  >
+  <svg class={className} viewBox="0 0 84 6" preserveAspectRatio="none" aria-hidden="true">
     <path
-      d="M2 5 C 12 2, 28 8, 38 4"
+      d="M2 3.4 C 24 1.8, 56 4.6, 82 2.8"
       fill="none"
       stroke={CRIMSON}
-      stroke-width="1.8"
+      stroke-width="1.4"
       stroke-linecap="round"
       vector-effect="non-scaling-stroke"
     />
   </svg>
 );
 
-/* 黄土のハイライト。本文の書き込み専用 */
+/*
+ * 黄土のハイライト。蛍光ペンではなく色鉛筆のつもりなので、
+ * SVG の塗りをやめて端の薄れる gradient にした（CSS の .mark-highlight）。
+ * 行をまたいでも破綻しないという利点もある
+ */
 const HandHighlight: FC<{ children: Child }> = ({ children }) => (
-  <span class="mark-highlight">
-    <svg viewBox="0 0 90 28" preserveAspectRatio="none" aria-hidden="true">
-      <path
-        d="M2 4 C 24 1, 58 3, 88 4 C 89 12, 88 19, 87 24 C 60 26, 28 25, 3 24 C 1 17, 1 10, 2 4 Z"
-        fill={OCHRE}
-        opacity=".34"
-      />
-    </svg>
-    <span>{children}</span>
-  </span>
+  <span class="mark-highlight">{children}</span>
 );
 
 /*
@@ -247,16 +163,11 @@ const HandHighlight: FC<{ children: Child }> = ({ children }) => (
  * カバー写真（#72）を JSX から出すときにこちらへ戻す。
  */
 
-/* 右下の折り目。裏から rss と about が出る。モバイルでは使わない */
-const DogEar: FC = () => (
-  <div class="dogear">
-    <div class="dogear-back">
-      <a href="/feed.xml">rss</a>
-      <a href="/">about</a>
-    </div>
-    <div class="dogear-fold" aria-hidden="true" />
-  </div>
-);
+/*
+ * 右下の折り目（ドッグイヤー）は置かない。
+ * ルーズリーフでは rss も自己紹介も赤線の左の見出し欄に書くので、
+ * 紙の隅をめくる仕掛けは役目が重複する
+ */
 
 /* 記事末と メニューの署名。1ページ1回だけ */
 const Signature: FC<{ class?: string }> = ({ class: className = "" }) => (
@@ -265,14 +176,4 @@ const Signature: FC<{ class?: string }> = ({ class: className = "" }) => (
   </span>
 );
 
-export {
-  DogEar,
-  HandBox,
-  HandHighlight,
-  HandRule,
-  HandStamp,
-  HandUnderline,
-  PaperFilters,
-  PaperTexture,
-  Signature,
-};
+export { HandHighlight, HandRule, HandUnderline, PaperFilters, PaperTexture, Signature };

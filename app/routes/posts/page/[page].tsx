@@ -2,9 +2,9 @@ import { ssgParams } from "hono/ssg";
 import { createRoute } from "honox/factory";
 import { Layout } from "../../../components/layout";
 import { Pagination } from "../../../components/pagination";
-import { PostList, PostsAside, PostsHeading } from "../../../components/post-list";
+import { PostList, PostsHeadNote } from "../../../components/post-list";
 import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "../../../lib/config";
-import { getAllPosts, getPostsForPage, getTotalPages } from "../../../lib/posts";
+import { getPostsForPage, getTotalPages } from "../../../lib/posts";
 
 const SECOND_PAGE = 2;
 
@@ -30,23 +30,16 @@ export default createRoute(
 
     return c.render(
       <Layout
-        title={`ブログ記事一覧 - ページ ${currentPage} - ${SITE_TITLE}`}
         description={SITE_DESCRIPTION}
+        headNote={<PostsHeadNote currentPage={currentPage} totalPages={totalPages} />}
         nav="posts"
         ogUrl={`${SITE_URL}/posts/page/${currentPage}`}
+        title={`記事 ${currentPage}枚目 - ${SITE_TITLE}`}
       >
-        <div class="sheet grid gap-10 pt-6 pb-10 lg:grid-cols-[1fr_240px] lg:pt-8 lg:pb-[46px]">
-          <main class="min-w-0">
-            <PostsHeading
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalPosts={getAllPosts().length}
-            />
-            <PostList posts={posts} />
-            <Pagination currentPage={currentPage} totalPages={totalPages} />
-          </main>
-          <PostsAside />
-        </div>
+        <main class="body-col">
+          <PostList posts={posts} />
+          <Pagination currentPage={currentPage} totalPages={totalPages} />
+        </main>
       </Layout>,
     );
   },

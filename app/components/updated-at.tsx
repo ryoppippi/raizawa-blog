@@ -2,8 +2,9 @@ import type { FC } from "hono/jsx";
 import { isSameDay, toSlashDate } from "../lib/date";
 
 /*
- * `July 28, 2026 ・ updated 07/30` の後半。
- * 同じ日に直しただけの記事に updated を出しても読み手の判断は変わらないので出さない。
+ * `7/28 ・ しゅみ ・ 7/30 直した` の末尾。
+ * 紙に書き足した体なので、英語の updated ではなく手書きの言い回しにする。
+ * 同じ日に直しただけの記事に出しても読み手の判断は変わらないので出さない。
  * 年を省いているのは、直前に出る作成日と同じ年がほとんどで、繰り返すと日付が読みにくくなるため。
  */
 const UpdatedAt: FC<{
@@ -15,8 +16,9 @@ const UpdatedAt: FC<{
   }
   return (
     <>
-      {" ・ updated "}
-      <time>{toSlashDate(updatedAt)}</time>
+      {" ・ "}
+      <time dateTime={updatedAt}>{toSlashDate(updatedAt)}</time>
+      {" 直した"}
     </>
   );
 };

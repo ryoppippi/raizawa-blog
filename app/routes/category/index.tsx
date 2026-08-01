@@ -13,12 +13,14 @@ export default createRoute((c) => {
     <Layout
       title={`categories - ${SITE_TITLE}`}
       description="カテゴリ一覧"
-      nav="categories"
+      nav="tags"
       ogUrl={`${SITE_URL}/category`}
     >
-      <main class="sheet-narrow pt-8 pb-14">
+      <main class="body-col">
         {/* タグ一覧の下半分と同じ行。カテゴリは3つしかないので雲にはしない */}
-        <h1 class="label-heading mb-[18px]">categories</h1>
+        <h1 class="mb-[18px] text-h2 font-semibold text-ink-strong" style="rotate: -0.3deg">
+          分類
+        </h1>
         <div class="flex flex-col gap-[2px]">
           {categories.map(({ category, count }) => (
             <a

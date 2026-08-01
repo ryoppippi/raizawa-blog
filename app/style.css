@@ -1,22 +1,31 @@
 @import "tailwindcss" source("../app");
 
 /*
- * 紙のデザイン。
- * 決まりごと（design_handoff_paper_blog/README.md より）:
- *   1. 紙は上質紙1種。地・ヘッダー・コードの紙まで同じテクスチャ。
- *   2. 和文は Klee One だけ。ラテン・数字は EB Garamond、署名だけ Parisienne。
- *   3. UIの色は深緑だけ。黄土とエンジは「手で書き込んだ部分」にしか使わない。
- *   4. 囲みはすべてボールペン。四角枠は カテゴリ / note / rss / 現在ページ の4か所だけ。
- *   5. 角丸は使わない。ダークモードは作らない。
+ * ルーズリーフのデザイン。
+ * 「用紙にボールペンで雑にまとめている」— 組んだ紙面ではなくメモの延長。
+ *
+ * design_handoff_looseleaf/README.md より:
+ *   1. 紙面＝ビューポート。机の余白は作らない
+ *   2. 写真は白フチ台紙に貼らない。テープ直貼り＋ペンのキャプション
+ *   3. 見出し欄（赤線の左）は1ページ1役割。記事ページでは目次のみ
+ *   4. 入力欄・強調は囲むより下線。囲みは 現在地の楕円 / カテゴリ / note だけ
+ *   5. 矢印は説明の向きに引く（抽象→具体、入力→結果）。文字の → ↗ は使わない
+ *   6. 行はルーズリーフの罫線に乗る（配置は几帳面にしない）
+ *
+ * design_handoff_paper_blog/README.md から引き継ぐもの:
+ *   和文は Klee One だけ／UIの色は深緑だけ（黄土とエンジは書き込み専用）／角丸なし／
+ *   紙の質感の SVG フィルター（#paper / #grain / #fiber / #ink）／ダークモードは作らない
  */
 
 @theme {
   /* --- 色 --- */
   --color-paper: #f6f1e4; /* 紙（地・ヘッダー） */
-  --color-paper-2: #fdfaf1; /* 紙（二次面・行のホバー） */
+  --color-paper-2: #fdfaf1; /* 紙（二次面） */
   --color-paper-print: #fdfcf7; /* 印刷して貼った紙（コードブロック） */
-  --color-photo: #ffffff; /* 写真の白フチ */
-  --color-desk: #ddd7c6; /* 紙の外側 */
+  --color-desk: #ddd7c6; /* 綴じ穴の向こう側 */
+  --color-tape: rgb(235 226 196 / 0.78); /* マスキングテープ */
+  --color-rule: rgb(106 124 138 / 0.26); /* ルーズリーフの罫線 */
+  --color-margin-line: rgb(140 28 43 / 0.4); /* 赤いマージンライン */
 
   --color-ink: #332f26; /* 本文 */
   --color-ink-strong: #1c1a15; /* 見出し・強い文字 */
@@ -50,21 +59,28 @@
   --text-body: 0.96875rem; /* 15.5px 本文 */
   --text-body--line-height: 2.15;
   --text-lead: 1.0625rem; /* 17px  一覧タイトル */
+  --text-lead-lg: 1.1875rem; /* 19px  一覧の最新1件 */
   --text-h4: 1.0625rem; /* 17px */
   --text-h3: 1.1875rem; /* 19px */
-  --text-h2: 1.5rem; /* 24px */
+  --text-h2: 1.3125rem; /* 21px  節見出し */
   --text-h1: 2.125rem; /* 34px */
-  --text-h1-sm: 1.625rem; /* 26px モバイルの h1 */
-
-  /* --- 余白 --- */
-  --spacing-sheet: 46px; /* 紙の左右 padding（デスクトップ） */
-  --spacing-sheet-sm: 20px; /* 同（モバイル） */
+  --text-h1-sm: 1.4375rem; /* 23px モバイルの h1 */
 
   /* --- 影 --- */
-  --shadow-photo: 0 8px 20px rgb(43 39 33 / 0.16);
-  --shadow-photo-lg: 0 10px 26px rgb(43 39 33 / 0.18);
-  --shadow-photo-hover: 0 14px 30px rgb(43 39 33 / 0.2);
-  --shadow-stack: 0 1px 0 #f2ecdd, 0 3px 0 #e9e2cf, 2px 12px 26px rgb(43 39 33 / 0.22);
+  --shadow-photo: 0 3px 9px rgb(43 39 33 / 0.28); /* テープ直貼りの写真 */
+  --shadow-photo-lg: 0 4px 11px rgb(43 39 33 / 0.3);
+  --shadow-tape: 0 1px 2px rgb(43 39 33 / 0.2);
+  --shadow-stack: 0 1px 0 #f2ecdd, 0 3px 0 #e9e2cf, 2px 10px 22px rgb(43 39 33 / 0.22);
+
+  /* --- 書き込み --- */
+  /* 蛍光ペンではなく色鉛筆のつもり。端が薄れるので linear-gradient で引く */
+  --highlight-ochre: linear-gradient(
+    104deg,
+    transparent 2%,
+    rgb(200 149 47 / 0.38) 6%,
+    rgb(200 149 47 / 0.34) 94%,
+    transparent 98%
+  );
 
   /* --- 動き --- */
   --ease-paper: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -81,14 +97,42 @@
     scroll-behavior: smooth;
   }
 
+  /*
+   * ルーズリーフの寸法。行が罫線に乗るよう line-height は罫線の間隔に一致させる。
+   * 罫線の開始位置はヘッダーの下端。赤線より右が本文カラム
+   */
+  :root {
+    --rule-pitch: 32px;
+    --rule-top: 86px;
+    --margin-x: 44px;
+    --body-x: 64px;
+    --line: 33px; /* --rule-pitch + 1px */
+  }
+
+  @media (min-width: 1024px) {
+    :root {
+      --rule-pitch: 33px;
+      --rule-top: 112px;
+      --margin-x: 190px;
+      --body-x: 224px;
+      --line: 34px;
+    }
+  }
+
   body {
     background: var(--color-paper);
     color: var(--color-ink);
     font-family: var(--font-jp);
-    font-size: var(--text-body);
-    line-height: 2.15;
+    font-size: 0.9375rem; /* 15px */
+    line-height: var(--line);
     /* 紙にアンチエイリアスの膨らみは要らない */
     -webkit-font-smoothing: antialiased;
+  }
+
+  @media (min-width: 1024px) {
+    body {
+      font-size: var(--text-body); /* 15.5px */
+    }
   }
 
   a {
@@ -114,9 +158,51 @@
    * 紙
    * ============================================================ */
 
-  /* ページの器。テクスチャの親になるので position: relative が要る */
+  /*
+   * 1枚のルーズリーフ。ページの器そのもの。
+   * ::before が罫線、::after が赤いマージンライン。どちらも紙の一部なので
+   * 中身と一緒にスクロールする（背景に貼ると行と罫線がずれる）
+   */
   .paper-sheet {
     @apply relative w-full;
+    min-height: 100vh;
+  }
+
+  .paper-sheet::before {
+    content: "";
+    @apply pointer-events-none absolute inset-0 z-0;
+    background-image: repeating-linear-gradient(
+      180deg,
+      transparent 0 var(--rule-pitch),
+      var(--color-rule) var(--rule-pitch) calc(var(--rule-pitch) + 1px)
+    );
+    background-position: 0 var(--rule-top);
+  }
+
+  .paper-sheet::after {
+    content: "";
+    @apply pointer-events-none absolute inset-y-0 z-0;
+    left: var(--margin-x);
+    width: 1.5px;
+    background: var(--color-margin-line);
+  }
+
+  /*
+   * 綴じ穴。デザインは3つ固定だが、記事の長さで紙は伸びるので
+   * 一定間隔で繰り返す。inset shadow は gradient で描けないので、
+   * 影を少しずらした2枚目の円で代わりにする
+   */
+  .binder-holes {
+    @apply pointer-events-none absolute z-0 hidden w-[17px] lg:block;
+    left: 44px;
+    top: 260px;
+    bottom: 40px;
+    /* 先に書いた層が上に来る。穴の面を上、落ちる影を下に置く */
+    background-image:
+      radial-gradient(circle at 8.5px 8.5px, var(--color-desk) 0 8.5px, transparent 8.5px),
+      radial-gradient(circle at 9.5px 10.5px, rgb(43 39 33 / 0.35) 0 8.5px, transparent 8.5px);
+    background-size: 17px 270px;
+    background-repeat: repeat-y;
   }
 
   /* 紙の地。#paper フィルターを multiply で1枚敷く。
@@ -127,7 +213,7 @@
     z-index: 0;
     filter: url("#paper");
     mix-blend-mode: multiply;
-    opacity: 0.55;
+    opacity: 0.5;
     pointer-events: none;
   }
 
@@ -140,12 +226,48 @@
     @apply relative;
   }
 
-  /* 紙全体の横幅。記事は 1080px 相当、狭い画面は左右 20px */
-  .sheet {
-    @apply mx-auto w-full max-w-[1080px] px-5 lg:px-[46px];
+  /* ヘッダー。下端は手書きのペン線で切る（border は使わない） */
+  .sheet-head {
+    @apply relative flex items-baseline px-[14px] pt-4 pl-5 lg:px-[60px] lg:pt-[26px] lg:pl-10;
+    min-height: var(--rule-top);
   }
-  .sheet-narrow {
-    @apply mx-auto w-full max-w-[760px] px-5 lg:px-[46px];
+
+  /*
+   * 見出し欄（赤線の左）。1ページ1役割。
+   * 一覧・検索・自己紹介ではサイトの目次、記事詳細ではその記事の目次だけを置く
+   */
+  .margin-col {
+    @apply absolute left-0 z-10 hidden flex-col text-[15px] text-green-soft lg:flex;
+    top: var(--rule-top);
+    width: var(--margin-x);
+    box-sizing: border-box;
+    padding: 22px 24px 0 66px;
+  }
+  .margin-col a,
+  .margin-col span {
+    line-height: var(--line);
+  }
+  .margin-col a {
+    @apply w-fit text-green-soft;
+    transition: transform 0.2s;
+  }
+  .margin-col a:hover {
+    transform: translateX(3px);
+  }
+
+  /*
+   * 本文カラム。赤線の右から始まる。
+   * 上の余白は罫線の倍数にする。半端に空けると1行目から罫線に乗らない
+   */
+  .body-col {
+    @apply relative px-5 lg:pr-[60px];
+    padding-left: var(--body-x);
+    padding-top: var(--line);
+  }
+  @media (min-width: 1024px) {
+    .body-col {
+      max-width: calc(var(--body-x) + 780px);
+    }
   }
 
   /* ============================================================
@@ -174,10 +296,10 @@
    * 手書き（SVG は components/paper.tsx が描く。ここは器だけ）
    * ============================================================ */
 
-  /* 手書きの四角で囲んだラベル。カテゴリ / note / rss / 現在ページの4か所だけ
-   * 行間は本文の 2.15 を継がせない。継ぐと囲みが縦に伸びて紙のラベルに見えない */
+  /* 手書きの四角で囲んだラベル。カテゴリ と note だけ
+   * 行間は本文の罫線を継がせない。継ぐと囲みが縦に伸びて紙のラベルに見えない */
   .hand-box {
-    @apply relative inline-block px-[13px] py-[5px] font-label text-label leading-[1.4] tracking-[0.08em] text-green;
+    @apply relative inline-block px-[10px] py-[2px] text-[12.5px] leading-[1.4] text-green;
   }
   /*
    * SVG は置換要素なので、inset:0 だけでは viewBox の縦横比から自然サイズが決まり、
@@ -190,12 +312,23 @@
     @apply relative;
   }
 
+  /* 手書きの楕円囲み。サイト名と、見出し欄の現在地に使う */
+  .hand-ellipse {
+    @apply relative inline-block;
+  }
+  .hand-ellipse > svg {
+    @apply pointer-events-none absolute inset-0 h-full w-full overflow-visible;
+  }
+  .hand-ellipse > span {
+    @apply relative;
+  }
+
   /* 手書きの下線（現在地）。文字の下に潜り込ませる */
   .hand-underline {
     @apply relative;
   }
   .hand-underline > svg {
-    @apply pointer-events-none absolute inset-x-0 -bottom-[5px] h-[10px] w-full overflow-visible;
+    @apply pointer-events-none absolute inset-x-0 bottom-[2px] h-[6px] w-full overflow-visible;
   }
 
   /* 手書きの罫線。幅に追従させるので preserveAspectRatio="none" 前提 */
@@ -203,43 +336,54 @@
     @apply pointer-events-none block h-[9px] w-full overflow-visible;
   }
 
-  /* 黄土のハイライト・エンジの下線（本文の書き込み） */
+  /*
+   * 黄土のハイライト。蛍光ペンではなく色鉛筆のつもりなので、
+   * SVG の塗りではなく端の薄れる gradient で引く。行をまたいでも破綻しない
+   */
   .mark-highlight {
-    @apply relative inline-block px-[3px];
-  }
-  .mark-highlight > svg {
-    @apply pointer-events-none absolute -inset-[2px];
-    width: calc(100% + 4px);
-    height: calc(100% + 4px);
-  }
-  .mark-highlight > span {
-    @apply relative;
+    @apply px-[3px];
+    background: var(--highlight-ochre);
   }
 
   /* ============================================================
    * 写真
    * ============================================================ */
 
-  /* 白フチ。下にキャプションを置く時は padding-bottom を 0 にする */
-  .photo-frame {
-    @apply relative bg-photo p-[11px] pb-0;
+  /*
+   * 白フチの台紙には貼らない。紙に直接テープで留める。
+   * 傾きは1枚ずつ変えたいので、--tilt をインラインで渡す
+   */
+  .photo {
+    @apply relative block;
+    rotate: var(--tilt, -1.8deg);
+    transition: translate 0.28s var(--ease-paper);
+  }
+  .photo:hover {
+    translate: 0 -4px;
+  }
+  .photo-body {
+    @apply relative block;
     box-shadow: var(--shadow-photo-lg);
-    transition:
-      transform 0.28s var(--ease-paper),
-      box-shadow 0.28s;
   }
-  .photo-frame-sm {
-    @apply relative bg-photo p-[3px];
-    box-shadow: 0 2px 7px rgb(43 39 33 / 0.14);
+  .photo img {
+    @apply block h-auto w-full;
   }
-  a:hover > .photo-frame,
-  .photo-frame-hover:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 18px 38px rgb(43 39 33 / 0.22);
+
+  /* マスキングテープ。上辺2箇所、または上1＋下1 */
+  .tape {
+    @apply pointer-events-none absolute h-[19px];
+    background: var(--color-tape);
+    box-shadow: var(--shadow-tape);
+  }
+
+  /* 写真の下にペンで書いたキャプション */
+  .photo-caption {
+    @apply block px-[2px] pt-2 text-[13.5px] leading-normal text-ink;
+    rotate: 0.4deg;
   }
 
   /*
-   * 写真に乗せる粒・繊維・インク溜まり。図解とスクショ（.plain）には掛けない。
+   * 写真に乗せる粒。図解とスクショ（.plain）には掛けない。
    * viewBox を持たない svg は幅高さを書かないと 300x150 で止まるので、器に合わせる
    */
   .photo-grain,
@@ -248,64 +392,87 @@
     @apply pointer-events-none absolute inset-0 h-full w-full;
   }
   .photo-grain {
-    opacity: 0.46;
+    opacity: 0.4;
     mix-blend-mode: multiply;
   }
-  .photo-fiber {
-    opacity: 0.17;
-    mix-blend-mode: screen;
-  }
+  /* 繊維とインク溜まりは白フチの台紙あってのものなので、直貼りでは出さない */
+  .photo-fiber,
   .photo-well {
-    box-shadow: inset 0 0 50px rgb(38 36 30 / 0.2);
-  }
-
-  .photo-caption {
-    @apply flex items-center justify-between px-1 pt-[9px] pb-[11px] font-label text-meta tracking-[0.16em] text-ink-soft;
+    display: none;
   }
 
   /* ============================================================
    * 一覧
    * ============================================================ */
 
-  /* 日付｜カテゴリ｜タイトル｜#タグ の1行 */
+  /*
+   * 一覧＝書き足していく索引。行は罫線に乗せる。
+   * 下敷きを敷くと罫線が隠れて紙に見えなくなるので、ホバーは横のずれだけにする
+   */
   .post-row {
-    @apply flex items-center gap-4 px-[14px] py-[14px] text-ink;
-    transition:
-      background 0.2s,
-      transform 0.2s;
+    @apply flex items-baseline gap-4 text-ink;
+    line-height: var(--line);
+    transition: transform 0.2s;
   }
   .post-row:hover {
-    background: rgb(253 250 241 / 0.9);
-    transform: translateX(3px);
+    transform: translateX(4px);
     color: var(--color-ink);
+  }
+  /* 日付は幅を揃える。揃わないとタイトルの頭が毎行ずれて索引に見えない */
+  .post-row time {
+    @apply shrink-0 text-[13.5px] text-ink-soft;
+    width: 64px;
   }
 
   /* ============================================================
    * 本文
    * ============================================================ */
 
+  /* 本文は罫線に乗る。段落の間も罫線の倍数で空ける（半端に空けると行がずれる） */
   .prose-article {
-    @apply text-body text-ink;
+    @apply text-ink;
+    line-height: var(--line);
   }
 
   .prose-article p {
-    @apply my-0 mb-5;
+    @apply my-0;
+  }
+  .prose-article p + p {
+    margin-top: var(--line);
   }
 
+  /*
+   * 節見出しはエンジの短いチェック風ストローク＋Klee One 600。
+   * 前後の空きも罫線の倍数にする
+   */
   .prose-article h2 {
-    @apply mt-[34px] mb-4 flex items-center gap-3 text-h2 font-semibold tracking-[0.03em] text-ink-strong;
+    @apply flex items-baseline gap-[10px] text-h2 font-semibold text-ink-strong;
+    margin: calc(var(--line) * 2) 0 0;
+    rotate: -0.4deg;
   }
-  /* h2 の頭のエンジの棒。手で引いた線の代わりの短い印 */
   .prose-article h2::before {
     content: "";
-    @apply inline-block h-[3px] w-5 shrink-0 bg-crimson;
+    @apply inline-block h-[9px] w-[22px] shrink-0 self-center;
+    /* 短いチェックのストローク。SVG を毎回置くより軽い */
+    background:
+      linear-gradient(
+          to bottom right,
+          transparent 47%,
+          var(--color-crimson) 47% 62%,
+          transparent 62%
+        )
+        no-repeat left bottom / 9px 6px,
+      linear-gradient(to top right, transparent 40%, var(--color-crimson) 40% 55%, transparent 55%)
+        no-repeat right top / 14px 9px;
   }
 
   .prose-article h3 {
-    @apply mt-8 mb-3 text-h3 font-semibold text-ink-strong;
+    @apply text-h3 font-semibold text-ink-strong;
+    margin: calc(var(--line) * 1.5) 0 0;
   }
   .prose-article h4 {
-    @apply mt-6 mb-2 text-h4 font-semibold text-ink-strong;
+    @apply text-h4 font-semibold text-ink-strong;
+    margin: var(--line) 0 0;
   }
 
   .prose-article a {
@@ -364,23 +531,28 @@
     @apply opacity-100;
   }
 
-  /* 本文の図版。白フチ＋キャプション（左：説明／右：ファイル名） */
+  /*
+   * 本文の図版。テープ直貼りで、本文カラムから左へわざとはみ出す。
+   * 几帳面に収めるとメモの延長に見えない
+   */
   .prose-article figure {
-    @apply mx-0 my-0 mb-[26px];
-  }
-  .prose-article figure > .photo-frame {
-    @apply p-[10px] pb-0;
-  }
-  .prose-article figure img {
-    @apply block h-auto w-full;
+    @apply mx-0;
+    margin-block: var(--line);
+    margin-left: -14px;
   }
   .prose-article figcaption {
-    @apply flex justify-between gap-4 px-[3px] pt-[9px] pb-[11px] text-[12.5px] leading-normal text-ink-soft;
+    @apply block px-[2px] pt-2 text-[13.5px] leading-normal text-ink;
+    rotate: 0.4deg;
   }
-  /* 図解・スクリーンショットは素のまま（文字が読めなくなる） */
+  /* 図解・スクリーンショットは素のまま（文字が読めなくなる）。傾けもしない */
+  .prose-article figure.plain {
+    @apply ml-0;
+  }
+  .prose-article figure.plain .photo {
+    rotate: none;
+  }
   .prose-article figure.plain .photo-grain,
-  .prose-article figure.plain .photo-fiber,
-  .prose-article figure.plain .photo-well {
+  .prose-article figure.plain .tape {
     @apply hidden;
   }
 
@@ -490,7 +662,7 @@
     transform: translateX(3px);
   }
   .ogp-image {
-    @apply flex h-[108px] w-40 shrink-0 items-center justify-center self-center overflow-hidden bg-photo p-[4px];
+    @apply flex h-[108px] w-40 shrink-0 items-center justify-center self-center overflow-hidden;
   }
   .ogp-image img {
     @apply h-full w-full object-cover;
@@ -515,50 +687,55 @@
    * 目次
    * ============================================================ */
 
+  /* 見出し欄に置く記事の目次。現在地はエンジの手書き下線、罫線は引かない */
   .toc-link {
-    @apply relative self-start text-label text-[#6b6455];
+    @apply relative w-fit text-[14px] text-green-soft;
+    line-height: var(--line);
   }
   .toc-link.active {
     @apply text-ink-strong;
   }
-  /* 現在地はエンジの手書き下線。罫線は引かない */
   .toc-link > svg {
-    @apply pointer-events-none absolute inset-x-0 -bottom-[4px] h-[10px] w-full overflow-visible opacity-0;
+    @apply pointer-events-none absolute inset-x-0 bottom-[2px] h-[6px] w-full overflow-visible opacity-0;
   }
   .toc-link.active > svg {
     @apply opacity-100;
   }
 
   /* ============================================================
-   * 右下の折り目（ドッグイヤー）
-   * ホバーが無いモバイルでは使わない
+   * prev / next — 紙幅いっぱいの手書きの矢印
+   * ラベルは説明を付けず記事タイトルだけ
    * ============================================================ */
 
-  .dogear {
-    @apply pointer-events-none fixed right-0 bottom-0 z-30 hidden h-[110px] w-[110px] lg:block;
+  .paper-nav {
+    @apply flex flex-col gap-[6px];
+    transition: transform 0.2s;
   }
-  .dogear-fold {
-    @apply absolute inset-0 cursor-pointer;
-    clip-path: polygon(100% 0, 100% 100%, 0 100%);
-    background: linear-gradient(45deg, #f6f1e4 0%, #e9e2cf 60%, #d2c9b0 100%);
-    box-shadow: -5px -5px 12px rgb(43 39 33 / 0.16);
-    transform-origin: 100% 100%;
-    transition: transform 0.45s var(--ease-paper);
-    pointer-events: auto;
+  .paper-nav svg {
+    @apply block h-[26px] w-full max-w-[300px];
   }
-  .dogear-back {
-    @apply absolute right-3 bottom-3 flex flex-col items-end gap-1 opacity-0 transition-opacity duration-300;
+  .paper-nav span {
+    @apply text-[17px] leading-snug font-semibold text-crimson;
+    filter: url("#ink");
   }
-  .dogear-back a {
-    @apply pointer-events-auto font-label text-label tracking-[0.14em] text-green;
+  .paper-nav-prev {
+    rotate: -0.5deg;
   }
-  .dogear:hover .dogear-fold,
-  .dogear:focus-within .dogear-fold {
-    transform: rotate(10deg) scale(0.4);
+  .paper-nav-prev span {
+    @apply pl-[30px];
   }
-  .dogear:hover .dogear-back,
-  .dogear:focus-within .dogear-back {
-    @apply opacity-100 delay-150;
+  .paper-nav-prev:hover {
+    transform: translateX(-4px);
+  }
+  .paper-nav-next {
+    @apply items-end;
+    rotate: 0.4deg;
+  }
+  .paper-nav-next span {
+    @apply pr-[30px] text-right;
+  }
+  .paper-nav-next:hover {
+    transform: translateX(4px);
   }
 
   /* ============================================================
@@ -574,9 +751,11 @@
   .lightbox.is-open {
     @apply flex;
   }
+  /* 拡大は紙から剥がして手に取るところ。テープは付けない */
   .lightbox img {
-    @apply max-h-[82vh] max-w-[86vw] bg-photo p-2;
-    box-shadow: 0 24px 60px rgb(0 0 0 / 0.45);
+    @apply max-h-[82vh] max-w-[86vw];
+    box-shadow: 0 30px 70px rgb(0 0 0 / 0.5);
+    rotate: 0.6deg;
   }
   .lightbox-bar {
     @apply absolute bottom-8 flex items-center gap-4 px-5 py-2 font-label text-label text-paper;
@@ -587,8 +766,34 @@
     @apply cursor-pointer text-paper;
   }
   .lightbox-close {
-    @apply absolute top-6 right-6 flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-full text-paper;
-    background: rgb(246 241 228 / 0.16);
+    @apply absolute top-4 right-4 flex h-11 w-11 cursor-pointer items-center justify-center text-paper;
+  }
+}
+
+/*
+ * 紙の遷移。次のルーズリーフが右から差し込まれ、下の紙は少し沈む。
+ * ページ全体をめくる演出は不採用
+ */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: paper-sink 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+::view-transition-new(root) {
+  animation: paper-slide-in 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes paper-sink {
+  to {
+    transform: scale(0.985);
+  }
+}
+
+@keyframes paper-slide-in {
+  from {
+    transform: translateX(100%);
   }
 }
 
@@ -597,15 +802,23 @@
   scroll-margin-top: 5rem;
 }
 
-/* 印刷では紙のオーバーレイを外す。インクを重ねても紙は出ない */
+/* 印刷では紙の演出を外す。実際の紙に刷るので罫線も綴じ穴も要らない */
 @media print {
   .paper-texture,
   .photo-grain,
-  .photo-fiber,
-  .photo-well,
-  .dogear,
+  .binder-holes,
+  .tape,
   .code-block-wrapper::before {
     display: none !important;
+  }
+  .paper-sheet::before,
+  .paper-sheet::after {
+    display: none;
+  }
+  .photo,
+  .prose-article h2,
+  .code-block-wrapper {
+    rotate: none;
   }
   .code-block-wrapper {
     transform: none;
@@ -621,20 +834,26 @@
   html {
     scroll-behavior: auto;
   }
+  @view-transition {
+    navigation: none;
+  }
   .paper-texture,
-  .photo-grain,
-  .photo-fiber {
+  .photo-grain {
     display: none;
   }
-  .photo-frame,
+  .photo,
   .post-row,
-  .dogear-fold,
+  .paper-nav,
+  .margin-col a,
   .ogp-card {
     transition: none;
   }
-  a:hover > .photo-frame,
-  .photo-frame-hover:hover,
+  .photo:hover {
+    translate: none;
+  }
   .post-row:hover,
+  .paper-nav:hover,
+  .margin-col a:hover,
   .ogp-card:hover {
     transform: none;
   }

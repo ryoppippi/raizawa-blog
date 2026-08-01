@@ -26,7 +26,7 @@ export default createRoute(
         nav="tags"
         ogUrl={`${SITE_URL}/tag/${tag}`}
       >
-        <main class="sheet-narrow pt-8 pb-14">
+        <main class="body-col">
           {/* 見出しはタグ名そのまま。タグは囲まない決まりなので枠は付けない */}
           <header class="relative flex items-baseline justify-between gap-4 pb-4">
             <h1 class="text-h2 font-semibold text-ink-strong">{tag}</h1>

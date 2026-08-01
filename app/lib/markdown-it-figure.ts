@@ -5,16 +5,34 @@ import type { RenderRule } from "markdown-it/lib/renderer.mjs";
 import type Token from "markdown-it/lib/token.mjs";
 
 /*
- * 本文の画像を白フチの figure にする。
+ * 本文の画像を、紙にテープで直貼りした figure にする。
+ * 白フチの台紙には貼らない（ルーズリーフに写真を台紙ごと貼る人はいない）。
  *
- * 粒・繊維・インク溜まりは、markdown-it のレンダラが文字列しか返せず JSX の部品を
- * 呼べないので、ここで文字列として持つ。CSS 側の .photo-grain / .photo-fiber /
- * .photo-well と対になっている。
+ * 粒は markdown-it のレンダラが文字列しか返せず JSX の部品を呼べないので、
+ * ここで文字列として持つ。CSS 側の .photo-grain と対になっている。
  */
-const PHOTO_TEXTURE =
-  '<svg class="photo-grain" aria-hidden="true"><rect width="100%" height="100%" filter="url(#grain)"></rect></svg>' +
-  '<svg class="photo-fiber" aria-hidden="true"><rect width="100%" height="100%" filter="url(#fiber)"></rect></svg>' +
-  '<div class="photo-well" aria-hidden="true"></div>';
+const PHOTO_GRAIN =
+  '<svg class="photo-grain" aria-hidden="true"><rect width="100%" height="100%" filter="url(#grain)"></rect></svg>';
+
+/*
+ * マスキングテープ。上辺2箇所に、少し違う角度で貼る。
+ * 位置と角度を1枚ずつ変えたいところだが、markdown からは枚数しか分からないので
+ * 貼り方は2種類を交互に使う（全部同じだと機械が貼ったように見える）
+ */
+const TAPES = [
+  '<span class="tape" style="top:-9px;left:30px;width:62px;rotate:-4deg"></span>' +
+    '<span class="tape" style="top:-9px;right:40px;width:58px;rotate:4deg"></span>',
+  '<span class="tape" style="top:-9px;left:26px;width:56px;rotate:-5deg"></span>' +
+    '<span class="tape" style="bottom:-8px;right:20px;width:52px;rotate:5deg"></span>',
+];
+
+/* 傾きも交互に。几帳面に揃えるとメモの延長に見えない */
+const TILTS = ["-1.8deg", "2.2deg", "-1.6deg", "1.4deg"];
+
+let photoCount = 0;
+
+const nextTape = (): string => TAPES[photoCount % TAPES.length] ?? "";
+const nextTilt = (): string => TILTS[photoCount % TILTS.length] ?? "-1.8deg";
 
 /*
  * 図解・スクリーンショットの印は タイトル記法 `![alt](src "plain")` にした。
@@ -93,14 +111,6 @@ const figureClassOf = (token: Token): string => {
   return "";
 };
 
-/* キャプションが無い時は figcaption が持っていた下の余白を白フチ側で補う */
-const frameClassOf = (caption: string): string => {
-  if (caption === "") {
-    return "photo-frame pb-[10px]";
-  }
-  return "photo-frame";
-};
-
 const attr = (name: string, value: string): string => ` ${name}="${escapeHtml(value)}"`;
 
 const titleAttr = (title: string): string => {
@@ -130,13 +140,17 @@ const figcaptionOf = (caption: string): string => {
   if (caption === "") {
     return "";
   }
-  return `<figcaption><span>${escapeHtml(caption)}</span></figcaption>`;
+  return `<figcaption>${escapeHtml(caption)}</figcaption>`;
 };
 
-const figureHtml = (token: Token): string =>
-  `<figure${figureClassOf(token)}><div class="${frameClassOf(token.content)}">` +
-  `<div class="relative">${imgTag(token, true)}${PHOTO_TEXTURE}</div>` +
-  `${figcaptionOf(token.content)}</div></figure>\n`;
+const figureHtml = (token: Token): string => {
+  const html =
+    `<figure${figureClassOf(token)}><span class="photo" style="--tilt:${nextTilt()}">` +
+    `<span class="photo-body">${imgTag(token, true)}${PHOTO_GRAIN}${nextTape()}</span>` +
+    `${figcaptionOf(token.content)}</span></figure>\n`;
+  photoCount += 1;
+  return html;
+};
 
 const renderImage: RenderRule = (tokens, idx) => {
   const token = tokens[idx];
