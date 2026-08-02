@@ -605,6 +605,25 @@
     opacity: 0.4;
   }
 
+  /*
+   * 上辺に貼ったマスキングテープ。印刷して貼った紙なのでテープで留まっている。
+   * 写真と違って枚数が決まっているので、擬似要素2つで済ませる
+   */
+  .code-block-wrapper::after {
+    content: "";
+    @apply pointer-events-none absolute -top-[9px] left-[46px] z-10 h-[19px] w-[66px];
+    background: var(--color-tape);
+    box-shadow: var(--shadow-tape);
+    rotate: -3deg;
+  }
+  .code-head::before {
+    content: "";
+    @apply pointer-events-none absolute -top-[9px] right-[60px] z-10 h-[19px] w-[60px];
+    background: var(--color-tape);
+    box-shadow: var(--shadow-tape);
+    rotate: 4deg;
+  }
+
   /* ファイル名と copy の行。破線で区切る */
   .code-head {
     @apply relative z-1 flex items-center justify-between px-[14px] pt-[9px] pb-2 font-mono text-[11px] text-[#6f6656];
@@ -693,6 +712,19 @@
   }
   .ogp-site {
     @apply block font-label text-meta tracking-[0.14em] text-ink-soft;
+  }
+
+  /* 狭い画面では横に並べると画像に幅を取られてタイトルが1文字ずつ折り返す */
+  @media (max-width: 640px) {
+    .ogp-card {
+      @apply flex-col gap-0;
+    }
+    .ogp-image {
+      @apply h-32 w-full;
+    }
+    .ogp-content {
+      @apply px-4 pt-0;
+    }
   }
 
   /* ============================================================

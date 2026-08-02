@@ -3,6 +3,7 @@ import { createRoute } from "honox/factory";
 import { Layout } from "../../components/layout";
 import { HandRule } from "../../components/paper";
 import { PostList } from "../../components/post-list";
+import { postsLabel } from "../../lib/plural";
 import { SITE_TITLE, SITE_URL } from "../../lib/config";
 import { getCategories, getPostsByCategory } from "../../lib/posts";
 
@@ -30,7 +31,7 @@ export default createRoute(
           {/* カテゴリの手書き囲みは記事の行の中で使う印なので、見出しでは重ねない */}
           <header class="relative flex items-baseline justify-between gap-4 pb-4">
             <h1 class="text-h2 font-semibold text-ink-strong">{category}</h1>
-            <span class="label-date shrink-0">{posts.length} posts</span>
+            <span class="label-date shrink-0">{postsLabel(posts.length)}</span>
             <HandRule thin class="absolute inset-x-0 bottom-0" />
           </header>
 

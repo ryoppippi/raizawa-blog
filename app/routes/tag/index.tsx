@@ -1,6 +1,7 @@
 import { createRoute } from "honox/factory";
 import { Layout } from "../../components/layout";
 import { HandRule } from "../../components/paper";
+import { postsLabel } from "../../lib/plural";
 import { SITE_TITLE, SITE_URL } from "../../lib/config";
 import { getCategories, getPostsByCategory, getPostsByTag, getTags } from "../../lib/posts";
 
@@ -104,7 +105,7 @@ export default createRoute((c) => {
                 class="post-row items-baseline justify-between px-3 py-[11px]"
               >
                 <span class="text-lead font-semibold">{category}</span>
-                <span class="label-date">{count} posts</span>
+                <span class="label-date">{postsLabel(count)}</span>
               </a>
             ))}
           </div>
