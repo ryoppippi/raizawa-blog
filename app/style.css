@@ -226,18 +226,30 @@
     @apply relative;
   }
 
-  /* ヘッダー。下端は手書きのペン線で切る（border は使わない） */
+  /*
+   * ヘッダー。下端は手書きのペン線で切る（border は使わない）。
+   * 記事の読了バーがこの中にあるので、紙と一緒に流さず追従させる。
+   * 下の本文が透けると読めなくなるので紙色で塞ぎ、そのぶん罫線がこの帯だけ途切れる。
+   * 塞いだ面が平らだと別の紙が乗って見えるので、内側にも紙テクスチャを敷く
+   */
   .sheet-head {
-    @apply relative flex items-baseline px-[14px] pt-4 pl-5 lg:px-[60px] lg:pt-[26px] lg:pl-10;
+    @apply sticky top-0 z-20 flex items-baseline bg-paper px-[14px] pt-4 pl-5 lg:px-[60px] lg:pt-[26px] lg:pl-10;
     min-height: var(--rule-top);
+  }
+  .sheet-head > .paper-texture {
+    z-index: -1;
   }
 
   /*
    * 見出し欄（赤線の左）。1ページ1役割。
    * 一覧・検索・自己紹介ではサイトの目次、記事詳細ではその記事の目次だけを置く
    */
+  /*
+   * 紙の高さいっぱいに伸ばしておく。中の目次を sticky で追従させたいが、
+   * 器に高さが無いと sticky は動く余地を持てない
+   */
   .margin-col {
-    @apply absolute left-0 z-10 hidden flex-col text-[15px] text-green-soft lg:flex;
+    @apply absolute bottom-0 left-0 z-10 hidden flex-col text-[15px] text-green-soft lg:flex;
     top: var(--rule-top);
     width: var(--margin-x);
     box-sizing: border-box;

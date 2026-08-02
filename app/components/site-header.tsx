@@ -1,6 +1,6 @@
 import type { Child, FC } from "hono/jsx";
 import { HandEllipse } from "./hand-boxes";
-import { HandRule } from "./paper";
+import { HandRule, PaperTexture } from "./paper";
 import { NAV_TOGGLE_ID } from "../lib/config";
 
 /*
@@ -118,6 +118,8 @@ const SiteHeader: FC<{ headNote?: Child; readingMinutes?: number }> = ({
   readingMinutes,
 }) => (
   <header class="sheet-head">
+    {/* 帯を紙色で塞ぐぶん、同じテクスチャを内側にも敷いて地続きに見せる */}
+    <PaperTexture />
     <Logo />
     {headNote !== undefined && (
       <span class="hidden pl-[26px] text-[14px] text-ink-soft lg:inline" style="rotate: -0.4deg">

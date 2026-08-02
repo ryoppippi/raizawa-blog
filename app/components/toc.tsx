@@ -84,7 +84,8 @@ const ArticleIndex: FC<{ items: TocItem[] }> = ({ items }) => {
   }
   return (
     <nav class="margin-col" aria-label="目次">
-      <div class="sticky top-6 flex flex-col">
+      {/* 追従するヘッダーの下へ潜らないよう、その高さぶん下げて止める */}
+      <div class="sticky top-[calc(var(--rule-top)+16px)] flex flex-col">
         <span class="text-[12.5px] text-ink-soft">目次</span>
         <TocLinks items={items} />
       </div>

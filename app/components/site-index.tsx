@@ -40,46 +40,49 @@ const SiteIndex: FC<{ nav?: NavKey }> = ({ nav }) => {
 
   return (
     <nav class="margin-col">
-      {NAV_ITEMS.map((item, index) => (
-        <NavRow index={index} item={item} key={item.key} nav={nav} />
-      ))}
+      {/* 追従するヘッダーの下へ潜らないよう、その高さぶん下げて止める */}
+      <div class="sticky top-[calc(var(--rule-top)+16px)] flex flex-col">
+        {NAV_ITEMS.map((item, index) => (
+          <NavRow index={index} item={item} key={item.key} nav={nav} />
+        ))}
 
-      <svg
-        class="my-3 block h-[10px] w-[100px]"
-        viewBox="0 0 100 10"
-        aria-hidden="true"
-        focusable="false"
-      >
-        <path
-          d="M2 5 C 30 3, 70 7, 98 4.4"
-          fill="none"
-          stroke="#1f3d2b"
-          stroke-width="1.2"
-          opacity=".6"
-          stroke-linecap="round"
-        />
-      </svg>
-
-      {categories.map((category, index) => (
-        <a
-          class="text-[13px] text-green-soft"
-          href={`/category/${category.name}`}
-          key={category.name}
-          style={`rotate: ${tiltOf(index)}`}
+        <svg
+          class="my-3 block h-[10px] w-[100px]"
+          viewBox="0 0 100 10"
+          aria-hidden="true"
+          focusable="false"
         >
-          {category.name} <span class="font-label text-ink-faint">{category.count}</span>
-        </a>
-      ))}
+          <path
+            d="M2 5 C 30 3, 70 7, 98 4.4"
+            fill="none"
+            stroke="#1f3d2b"
+            stroke-width="1.2"
+            opacity=".6"
+            stroke-linecap="round"
+          />
+        </svg>
 
-      <div class="mt-10 flex flex-col gap-2">
-        <span class="text-[12.5px] text-green" style="rotate: -1deg">
-          更新はこれ
-        </span>
-        <a href="/feed.xml" class="w-fit" style="rotate: -2deg">
-          <HandStamp class="grid h-8 w-12 place-items-center px-0 font-label tracking-[0.08em] text-paper">
-            rss
-          </HandStamp>
-        </a>
+        {categories.map((category, index) => (
+          <a
+            class="text-[13px] text-green-soft"
+            href={`/category/${category.name}`}
+            key={category.name}
+            style={`rotate: ${tiltOf(index)}`}
+          >
+            {category.name} <span class="font-label text-ink-faint">{category.count}</span>
+          </a>
+        ))}
+
+        <div class="mt-10 flex flex-col gap-2">
+          <span class="text-[12.5px] text-green" style="rotate: -1deg">
+            更新はこれ
+          </span>
+          <a href="/feed.xml" class="w-fit" style="rotate: -2deg">
+            <HandStamp class="grid h-8 w-12 place-items-center px-0 font-label tracking-[0.08em] text-paper">
+              rss
+            </HandStamp>
+          </a>
+        </div>
       </div>
     </nav>
   );
