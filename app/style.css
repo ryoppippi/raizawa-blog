@@ -271,11 +271,19 @@
    * 器に高さが無いと sticky は動く余地を持てない
    */
   .margin-col {
-    @apply absolute bottom-0 left-0 z-10 hidden flex-col text-[15px] text-green-soft lg:flex;
+    @apply pointer-events-none absolute bottom-0 left-0 z-10 hidden flex-col text-[15px] text-green-soft lg:flex;
     top: var(--rule-top);
     width: var(--margin-x);
     box-sizing: border-box;
     padding: 22px 24px 0 66px;
+  }
+  /*
+   * 欄は紙の高さいっぱいに伸びているので、そのままだと左端 190px の
+   * クリックを全部吸ってしまう（prev の矢印が紙幅いっぱいに伸びていて下に入る）。
+   * 欄は素通しにして、実際に書いてある中身だけがクリックを受け取る
+   */
+  .margin-col > * {
+    @apply pointer-events-auto;
   }
   .margin-col a,
   .margin-col span {
