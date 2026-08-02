@@ -1,28 +1,52 @@
-import type { Child, FC } from "hono/jsx";
+import type { FC } from "hono/jsx";
+import { HandUnderline } from "./paper";
 import type { TocItem } from "../lib/toc";
 
 const MIN_TOC_ITEMS = 2;
 const H2_LEVEL = 2;
 const H3_LEVEL = 3;
-const H3_INDENT = "pl-4";
-const H4_INDENT = "pl-8";
+const H3_INDENT = "pl-3";
+const H4_INDENT = "pl-6";
 
+/*
+ * 現在地の印。
+ * 裸のブロックの直下で return すると「Illegal return statement」でスクリプトごと落ちるので、
+ * 早期脱出ではなく条件で包む。rootMargin は px と % しか取らない（rem は無効値で例外）。
+ * 目次は見出し欄とモバイルの折りたたみで2つ描かれるので、印は両方に付ける。
+ */
 const scrollspyScript = `{
   const tocLinks = document.querySelectorAll('.toc-link');
   const headings = document.querySelectorAll('article h2[id], article h3[id], article h4[id]');
-  if (tocLinks.length === 0 || headings.length === 0) return;
+  if (tocLinks.length > 0 && headings.length > 0) {
+    const activate = (id) => {
+      tocLinks.forEach((link) => { link.classList.remove('active'); });
+      const selector = '.toc-link[href="#' + CSS.escape(id) + '"]';
+      document.querySelectorAll(selector).forEach((link) => { link.classList.add('active'); });
+    };
 
-  const observer = new IntersectionObserver((entries) => {
-    for (const entry of entries) {
-      if (entry.isIntersecting) {
-        tocLinks.forEach(link => link.classList.remove('active'));
-        const activeLink = document.querySelector('.toc-link[href="#' + entry.target.id + '"]');
-        if (activeLink) activeLink.classList.add('active');
+    const topGap = window.matchMedia('(min-width: 1024px)').matches ? '0px' : '-80px';
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          activate(entry.target.id);
+        }
       }
-    }
-  }, { rootMargin: (window.matchMedia('(min-width: 1024px)').matches ? '0px' : '-5rem') + ' 0px -80% 0px' });
+    }, { rootMargin: topGap + ' 0px -80% 0px' });
 
-  headings.forEach(h => observer.observe(h));
+    headings.forEach((heading) => { observer.observe(heading); });
+
+    /*
+     * 最後の節は、後ろに画面の8割ぶんの中身が無いと判定の帯（上から20%）へ到達せず、
+     * 読み終えても現在地が手前の節に残る。紙の下端まで来たら最後の節に印を移す
+     */
+    const last = headings[headings.length - 1];
+    addEventListener('scroll', () => {
+      const atBottom = innerHeight + Math.ceil(scrollY) >= document.documentElement.scrollHeight - 2;
+      if (atBottom) {
+        activate(last.id);
+      }
+    }, { passive: true });
+  }
 }`;
 
 const shouldShowToc = (items: TocItem[]): boolean => items.length >= MIN_TOC_ITEMS;
@@ -37,56 +61,115 @@ const indentClass = (level: number): string => {
   return "";
 };
 
-const TocList: FC<{ items: TocItem[] }> = ({ items }) => (
-  <nav>
-    <ul class="menu menu-sm">
-      {items
-        .filter((item) => item.level >= H2_LEVEL)
-        .map((item) => (
-          <li class={indentClass(item.level)} key={item.id}>
-            <a href={`#${item.id}`} class="toc-link">
-              {item.text}
-            </a>
-          </li>
-        ))}
-    </ul>
-  </nav>
+/* 行ごとに少し傾ける。定規で書いたように揃えない */
+const TILTS = ["-0.4deg", "0.3deg", "-0.3deg", "0.4deg"];
+
+const tiltOf = (index: number): string => TILTS[index % TILTS.length] ?? "0deg";
+
+/*
+ * 目次の行。現在地はエンジの手書き下線で示すので、罫線もマーカーも引かない。
+ * 下線は active のときだけ CSS で見せる（.toc-link > svg）ため、
+ * 出し分けを JS に持たせず全部の行に置いてある。
+ */
+const TocLinks: FC<{ items: TocItem[] }> = ({ items }) => (
+  <>
+    {items
+      .filter((item) => item.level >= H2_LEVEL)
+      .map((item, index) => (
+        <a
+          class={`toc-link ${indentClass(item.level)}`}
+          href={`#${item.id}`}
+          key={item.id}
+          style={`rotate: ${tiltOf(index)}`}
+        >
+          {item.text}
+          <HandUnderline />
+        </a>
+      ))}
+  </>
 );
 
-const MobileToc: FC<{ items: TocItem[] }> = ({ items }) => (
-  <details class="collapse collapse-arrow bg-base-100 shadow-sm mb-6 lg:hidden">
-    <summary class="collapse-title font-bold">目次</summary>
-    <div class="collapse-content">
-      <TocList items={items} />
-    </div>
-  </details>
-);
-
-const TOC_DRAWER_ID = "toc-drawer";
-
-const TocLayout: FC<{ items: TocItem[]; children: Child }> = ({ items, children }) => {
+/*
+ * 見出し欄（赤線の左）に置く記事の目次。
+ * 1ページ1役割なので、ここにサイトのナビもメタ情報も置かない。
+ * 目次が無い記事では欄ごと空にする（無理に何かを書き足さない）
+ */
+const ArticleIndex: FC<{ items: TocItem[] }> = ({ items }) => {
   if (!shouldShowToc(items)) {
-    return <>{children}</>;
+    return <div class="margin-col" />;
   }
   return (
-    <>
-      <div class="drawer drawer-end lg:drawer-open">
-        <input id={TOC_DRAWER_ID} type="checkbox" class="drawer-toggle" />
-        <div class="drawer-content">
-          <MobileToc items={items} />
-          {children}
-        </div>
-        <div class="drawer-side z-30">
-          <label for={TOC_DRAWER_ID} aria-label="close table of contents" class="drawer-overlay" />
-          <div class="bg-base-200 min-h-full w-60 p-4">
-            <h2 class="font-bold mb-2 text-sm">目次</h2>
-            <TocList items={items} />
-          </div>
-        </div>
+    <nav class="margin-col" aria-label="目次">
+      {/* 追従するヘッダーの下へ潜らないよう、その高さぶん下げて止める */}
+      <div class="sticky top-[calc(var(--rule-top)+16px)] flex flex-col">
+        <span class="text-[12.5px] text-ink-soft">目次</span>
+        <TocLinks items={items} />
       </div>
-      <script dangerouslySetInnerHTML={{ __html: scrollspyScript }} />
-    </>
+    </nav>
   );
 };
 
-export { shouldShowToc, TocLayout };
+/* 折りたたみの向きを示す小さな山。文字の ▾ は使わない */
+const Chevron: FC = () => (
+  <svg width="12" height="8" viewBox="0 0 12 8" aria-hidden="true">
+    <path
+      d="M1.5 1.5 C 3 4, 4.5 6, 6 7 C 7.5 6, 9 4, 10.5 1.5"
+      fill="none"
+      stroke="#1f3d2b"
+      stroke-width="1.4"
+      stroke-linecap="round"
+    />
+  </svg>
+);
+
+/*
+ * モバイルの目次。本文の上に折りたたむ。
+ * 囲まない（囲みは 現在地の楕円 / カテゴリ / note だけ）ので、薄い線だけ引く。
+ * <details> にしたのは開閉に JS も追加の状態も要らないため
+ */
+const MobileToc: FC<{ items: TocItem[] }> = ({ items }) => {
+  if (!shouldShowToc(items)) {
+    return <></>;
+  }
+  return (
+    <details class="group lg:hidden">
+      <summary class="flex min-h-11 cursor-pointer list-none items-center gap-[10px] [&::-webkit-details-marker]:hidden">
+        <span class="text-[13.5px] text-green" style="rotate: -0.4deg">
+          目次
+        </span>
+        <span class="transition-transform group-open:-scale-y-100">
+          <Chevron />
+        </span>
+        <svg
+          class="h-[6px] flex-1"
+          viewBox="0 0 140 6"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M2 3.4 C 40 1.8, 100 4.8, 138 2.8"
+            fill="none"
+            stroke="#1f3d2b"
+            stroke-width=".9"
+            opacity=".5"
+            stroke-linecap="round"
+            vector-effect="non-scaling-stroke"
+          />
+        </svg>
+      </summary>
+      <nav class="flex flex-col pb-2" aria-label="目次">
+        <TocLinks items={items} />
+      </nav>
+    </details>
+  );
+};
+
+/* スクロールスパイ。目次を出したページだけが読み込む */
+const TocScript: FC<{ items: TocItem[] }> = ({ items }) => {
+  if (!shouldShowToc(items)) {
+    return <></>;
+  }
+  return <script dangerouslySetInnerHTML={{ __html: scrollspyScript }} />;
+};
+
+export { ArticleIndex, MobileToc, shouldShowToc, TocScript };

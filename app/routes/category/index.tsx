@@ -1,41 +1,39 @@
 import { createRoute } from "honox/factory";
 import { Layout } from "../../components/layout";
+import { postsLabel } from "../../lib/plural";
 import { SITE_TITLE, SITE_URL } from "../../lib/config";
 import { getCategories, getPostsByCategory } from "../../lib/posts";
 
 export default createRoute((c) => {
-  const categories = getCategories();
+  const categories = getCategories().map((category) => ({
+    category,
+    count: getPostsByCategory(category).length,
+  }));
 
   return c.render(
     <Layout
-      title={`カテゴリ一覧 - ${SITE_TITLE}`}
+      title={`categories - ${SITE_TITLE}`}
       description="カテゴリ一覧"
+      nav="tags"
       ogUrl={`${SITE_URL}/category`}
     >
-      <header class="card bg-base-100 shadow-sm mb-6">
-        <div class="card-body p-6">
-          <h1 class="text-2xl sm:text-3xl font-bold">カテゴリ一覧</h1>
+      <main class="body-col">
+        {/* タグ一覧の下半分と同じ行。カテゴリは3つしかないので雲にはしない */}
+        <h1 class="mb-[18px] text-h2 font-semibold text-ink-strong" style="rotate: -0.3deg">
+          分類
+        </h1>
+        <div class="flex flex-col gap-[2px]">
+          {categories.map(({ category, count }) => (
+            <a
+              key={category}
+              href={`/category/${category}`}
+              class="post-row items-baseline justify-between px-3 py-[11px]"
+            >
+              <span class="text-lead font-semibold">{category}</span>
+              <span class="label-date">{postsLabel(count)}</span>
+            </a>
+          ))}
         </div>
-      </header>
-
-      <main>
-        <ul class="space-y-4">
-          {categories.map((category) => {
-            const posts = getPostsByCategory(category);
-            return (
-              <li class="card bg-base-100 shadow-sm" key={category}>
-                <div class="card-body p-4">
-                  <h2 class="card-title">
-                    <a href={`/category/${category}`} class="link link-hover">
-                      {category}
-                    </a>
-                  </h2>
-                  <div class="text-sm text-base-content/70">{posts.length}件の記事</div>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
       </main>
     </Layout>,
   );

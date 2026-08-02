@@ -1,6 +1,9 @@
 import { ssgParams } from "hono/ssg";
 import { createRoute } from "honox/factory";
 import { Layout } from "../../components/layout";
+import { HandRule } from "../../components/paper";
+import { PostList } from "../../components/post-list";
+import { postsLabel } from "../../lib/plural";
 import { SITE_TITLE, SITE_URL } from "../../lib/config";
 import { getCategories, getPostsByCategory } from "../../lib/posts";
 
@@ -21,40 +24,18 @@ export default createRoute(
       <Layout
         title={`${category} - ${SITE_TITLE}`}
         description={`${category}の記事一覧`}
+        nav="tags"
         ogUrl={`${SITE_URL}/category/${category}`}
       >
-        <header class="card bg-base-100 shadow-sm mb-6">
-          <div class="card-body p-6">
-            <h1 class="text-2xl sm:text-3xl font-bold">{category}</h1>
-          </div>
-        </header>
+        <main class="body-col">
+          {/* カテゴリの手書き囲みは記事の行の中で使う印なので、見出しでは重ねない */}
+          <header class="relative flex items-baseline justify-between gap-4 pb-4">
+            <h1 class="text-h2 font-semibold text-ink-strong">{category}</h1>
+            <span class="label-date shrink-0">{postsLabel(posts.length)}</span>
+            <HandRule thin class="absolute inset-x-0 bottom-0" />
+          </header>
 
-        <main>
-          <ul class="space-y-4">
-            {posts.map((post) => (
-              <li class="card bg-base-100 shadow-sm" key={post.slug}>
-                <div class="card-body p-4">
-                  <h2 class="card-title">
-                    <a href={`/category/${category}/posts/${post.slug}`} class="link link-hover">
-                      {post.title}
-                    </a>
-                  </h2>
-                  <div class="text-sm text-base-content/70">
-                    <time>{new Date(post.createdAt).toLocaleDateString("ja-JP")}</time>
-                  </div>
-                  {post.tags.length > 0 && (
-                    <div class="flex flex-wrap gap-2 mt-2">
-                      {post.tags.map((tag) => (
-                        <span class="badge badge-outline" key={tag}>
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
+          <PostList posts={posts} linkPrefix={`/category/${category}/posts/`} />
         </main>
       </Layout>,
     );

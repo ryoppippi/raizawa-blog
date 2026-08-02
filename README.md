@@ -9,7 +9,6 @@ https://r-aizawa.com
 - [Cloudflare Workers](https://workers.cloudflare.com/) - Runtime
 - [Vite](https://vite.dev/) - Build tool
 - [Tailwind CSS](https://tailwindcss.com/) - CSS framework
-- [DaisyUI](https://daisyui.com/) - Component library
 - [Bun](https://bun.sh/) - Package manager & runtime
 - [Vitest](https://vitest.dev/) - Test framework
 - [OxLint](https://oxc.rs/docs/guide/usage/linter) - Linter
@@ -52,11 +51,8 @@ bun run verify
 | `bun run knip`         | 使われていない export・ファイル・依存  |
 | `bun run test`         | vitest                                 |
 
-記事の文章は CI では見ない。気になったときに目安として手元で叩く。
-
-```bash
-bun run post-check
-```
+記事の文章は CI では見ない。textlint と typos は devShell に入れてあるので、
+エディタ（nvim の LSP、textlint の MCP サーバ）から書きながら見る。
 
 ## Format
 

@@ -1,290 +1,914 @@
 @import "tailwindcss" source("../app");
-@plugin "daisyui";
 
-html {
-  scroll-behavior: smooth;
-}
+/*
+ * ルーズリーフのデザイン。
+ * 「用紙にボールペンで雑にまとめている」— 組んだ紙面ではなくメモの延長。
+ *
+ * design_handoff_looseleaf/README.md より:
+ *   1. 紙面＝ビューポート。机の余白は作らない
+ *   2. 写真は白フチ台紙に貼らない。テープ直貼り＋ペンのキャプション
+ *   3. 見出し欄（赤線の左）は1ページ1役割。記事ページでは目次のみ
+ *   4. 入力欄・強調は囲むより下線。囲みは 現在地の楕円 / カテゴリ / note だけ
+ *   5. 矢印は説明の向きに引く（抽象→具体、入力→結果）。文字の → ↗ は使わない
+ *   6. 行はルーズリーフの罫線に乗る（配置は几帳面にしない）
+ *
+ * 前のハンドオフから引き継いだもの:
+ *   和文は Klee One だけ／UIの色は深緑だけ（黄土とエンジは書き込み専用）／
+ *   角丸なし／ダークモードは作らない
+ */
 
 @theme {
-  /* Golden Ratio (phi = 1.618) Design Tokens */
+  /* --- 色 --- */
+  --color-paper: #f6f1e4; /* 紙（地・ヘッダー） */
+  --color-paper-2: #fdfaf1; /* 紙（二次面） */
+  --color-paper-print: #fdfcf7; /* 印刷して貼った紙（コードブロック） */
+  --color-tape: rgb(235 226 196 / 0.78); /* マスキングテープ */
+  --color-rule: rgb(106 124 138 / 0.26); /* ルーズリーフの罫線 */
+  --color-margin-line: rgb(140 28 43 / 0.4); /* 赤いマージンライン */
 
-  /* Spacing: base = 1rem */
-  --spacing-phi-1: 0.236rem; /* 1/phi^3 */
-  --spacing-phi-2: 0.382rem; /* 1/phi^2 */
-  --spacing-phi-3: 0.618rem; /* 1/phi   */
-  --spacing-phi-4: 1rem; /* base    */
-  --spacing-phi-5: 1.618rem; /* phi     */
-  --spacing-phi-6: 2.618rem; /* phi^2   */
-  --spacing-phi-7: 4.236rem; /* phi^3   */
-  --spacing-phi-8: 6.854rem; /* phi^4   */
+  --color-ink: #332f26; /* 本文 */
+  --color-ink-strong: #1c1a15; /* 見出し・強い文字 */
+  --color-ink-body: #4d4638; /* 抜粋・二次的な本文 */
+  --color-ink-soft: #7b7566; /* 弱い文字・キャプション */
+  --color-ink-faint: #a99f88; /* さらに弱い・数値の添え */
+  --color-ink-print: #2b2721; /* コードのインク */
 
-  /*
-   * Font Size
-   * --line-height values are intentionally hardcoded rather than referencing
-   * --leading-phi / --leading-phi-tight via var(). Reasons:
-   *   1. @theme is processed at build time; var() is resolved at runtime,
-   *      so Tailwind may not pick up the values for utility generation.
-   *   2. These are mathematical constants derived from phi — they won't drift.
-   *   3. Not all sizes share the same line-height (1.272, 1.15 have no
-   *      corresponding --leading-* token), so var() would be partial at best.
-   */
-  --text-phi-sm: 0.618rem;
-  --text-phi-sm--line-height: 1.618;
-  --text-phi-base: 1rem;
-  --text-phi-base--line-height: 1.618;
-  --text-phi-lg: 1.272rem; /* sqrt(phi) */
-  --text-phi-lg--line-height: 1.382;
-  --text-phi-xl: 1.618rem; /* phi       */
-  --text-phi-xl--line-height: 1.382;
-  --text-phi-2xl: 2.058rem; /* phi^1.5   */
-  --text-phi-2xl--line-height: 1.272;
-  --text-phi-3xl: 2.618rem; /* phi^2     */
-  --text-phi-3xl--line-height: 1.272;
-  --text-phi-4xl: 3.33rem; /* phi^2.5   */
-  --text-phi-4xl--line-height: 1.15;
+  --color-green: #1f3d2b; /* UIの唯一の色 */
+  --color-green-soft: #4d5a49;
+  --color-green-softer: #5d6b58;
 
-  /* Border Radius */
-  --radius-phi-sm: 0.382rem;
-  --radius-phi-md: 0.618rem;
-  --radius-phi-lg: 1rem;
-  --radius-phi-xl: 1.618rem;
+  --color-crimson: #8c1c2b; /* 手書きの書き込み専用 */
+  --color-ochre: #c8952f; /* 手書きのハイライト専用 */
 
-  /* Line Height */
-  --leading-phi: 1.618;
-  --leading-phi-tight: 1.382;
+  /* --- 書体 --- */
+  --font-jp: "Klee One", serif;
+  --font-label: "EB Garamond", serif;
+  --font-sign: "Parisienne", cursive;
+  --font-mono: "JetBrains Mono", ui-monospace, sfmono-regular, monospace;
+
+  /* --- 字の大きさ ---
+   * 和文（Klee One）とラテン（EB Garamond）は字面が違うので、
+   * 並べる時はラテン側を +1〜1.5px 上げた値をそのまま持っている。 */
+  --text-tag: 0.6875rem; /* 11px  #タグ */
+  --text-code: 0.78125rem; /* 12.5px コード */
+  --text-meta: 0.8125rem; /* 13px  ラベル・キャプション */
+  --text-meta-lg: 0.84375rem; /* 13.5px 日付 */
+  --text-label: 0.875rem; /* 14px  UIラベル */
+  --text-body-sm: 0.90625rem; /* 14.5px 補足の本文 */
+  --text-body: 0.96875rem; /* 15.5px 本文 */
+  --text-body--line-height: 2.15;
+  --text-lead: 1.0625rem; /* 17px  一覧タイトル */
+  --text-lead-lg: 1.1875rem; /* 19px  一覧の最新1件 */
+  --text-h4: 1.0625rem; /* 17px */
+  --text-h3: 1.1875rem; /* 19px */
+  --text-h2: 1.3125rem; /* 21px  節見出し */
+  --text-h1: 2.125rem; /* 34px */
+  --text-h1-sm: 1.4375rem; /* 23px モバイルの h1 */
+
+  /* --- 影 --- */
+  --shadow-photo: 0 3px 9px rgb(43 39 33 / 0.28); /* テープ直貼りの写真 */
+  --shadow-photo-lg: 0 4px 11px rgb(43 39 33 / 0.3);
+  --shadow-tape: 0 1px 2px rgb(43 39 33 / 0.2);
+  --shadow-stack: 0 1px 0 #f2ecdd, 0 3px 0 #e9e2cf, 2px 10px 22px rgb(43 39 33 / 0.22);
+
+  /* --- 書き込み --- */
+  /* 蛍光ペンではなく色鉛筆のつもり。端が薄れるので linear-gradient で引く */
+  --highlight-ochre: linear-gradient(
+    104deg,
+    transparent 2%,
+    rgb(200 149 47 / 0.38) 6%,
+    rgb(200 149 47 / 0.34) 94%,
+    transparent 98%
+  );
+
+  /* --- 動き --- */
+  --ease-paper: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* 角丸は使わない */
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
 }
 
-/* Article content styles */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /*
+   * ルーズリーフの寸法。行が罫線に乗るよう line-height は罫線の間隔に一致させる。
+   * 罫線の開始位置はヘッダーの下端。赤線より右が本文カラム
+   */
+  :root {
+    --rule-pitch: 32px;
+    --rule-top: 86px;
+    --margin-x: 44px;
+    --body-x: 64px;
+    --line: 33px; /* --rule-pitch + 1px */
+
+    /*
+     * 紙の質感。300px のタイルの中でフィルターを完結させて敷き詰める。
+     *
+     * 要素に filter: url(#paper) を直接掛けると、紙の高さぶん(長い記事だと4000px超)を
+     * 1枚で覆おうとしてブラウザのフィルター領域の上限に当たり、質感の掛かっていない
+     * 矩形が途中に残る。かといって固定にすると紙と一緒にスクロールせず、
+     * 質感だけ画面に貼り付いて見える。タイルなら上限にも当たらず紙にも付いてくる。
+     * stitchTiles="stitch" があるので継ぎ目は出ない
+     */
+    --paper-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.12' numOctaves='4' seed='3' stitchTiles='stitch' result='n'/%3E%3CfeDiffuseLighting in='n' lighting-color='%23fdfaf1' surfaceScale='1.1'%3E%3CfeDistantLight azimuth='225' elevation='65'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)'/%3E%3C/svg%3E");
+  }
+
+  @media (min-width: 1024px) {
+    :root {
+      --rule-pitch: 33px;
+      --rule-top: 112px;
+      --margin-x: 190px;
+      --body-x: 224px;
+      --line: 34px;
+    }
+  }
+
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-jp);
+    font-size: 0.9375rem; /* 15px */
+    line-height: var(--line);
+    /* 紙にアンチエイリアスの膨らみは要らない */
+    -webkit-font-smoothing: antialiased;
+  }
+
+  @media (min-width: 1024px) {
+    body {
+      font-size: var(--text-body); /* 15.5px */
+    }
+  }
+
+  a {
+    color: var(--color-green);
+    text-decoration: none;
+  }
+  a:hover {
+    color: var(--color-crimson);
+  }
+
+  ::selection {
+    background: rgb(200 149 47 / 0.34);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-crimson);
+    outline-offset: 2px;
+  }
+}
+
 @layer components {
-  .prose-article h1 {
-    @apply text-phi-3xl font-bold mt-phi-6 mb-phi-4;
+  /* ============================================================
+   * 紙
+   * ============================================================ */
+
+  /*
+   * 1枚のルーズリーフ。ページの器そのもの。
+   * ::before が罫線、::after が赤いマージンライン。どちらも紙の一部なので
+   * 中身と一緒にスクロールする（背景に貼ると行と罫線がずれる）
+   */
+  .paper-sheet {
+    @apply relative w-full;
+    min-height: 100vh;
   }
+
+  .paper-sheet::before {
+    content: "";
+    @apply pointer-events-none absolute inset-0 z-0;
+    background-image: repeating-linear-gradient(
+      180deg,
+      transparent 0 var(--rule-pitch),
+      var(--color-rule) var(--rule-pitch) calc(var(--rule-pitch) + 1px)
+    );
+    background-position: 0 var(--rule-top);
+  }
+
+  .paper-sheet::after {
+    content: "";
+    @apply pointer-events-none absolute inset-y-0 z-0;
+    left: var(--margin-x);
+    width: 1.5px;
+    background: var(--color-margin-line);
+  }
+
+  /* 紙の地。content より下に来るよう、中身側は .paper-layer を付ける */
+  .paper-texture {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: var(--paper-grain);
+    background-size: 300px 300px;
+    mix-blend-mode: multiply;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  /*
+   * テクスチャより上に載せるための持ち上げ。
+   * z-index は付けない。付けると積み重ね文脈ができて、この中のライトボックスが
+   * sticky ヘッダーの下に潜る。position だけでテクスチャ(z-0)より後ろに描かれる
+   */
+  .paper-layer {
+    @apply relative;
+  }
+
+  /*
+   * ヘッダー。下端は手書きのペン線で切る（border は使わない）。
+   * 記事の読了バーがこの中にあるので、紙と一緒に流さず追従させる。
+   * 下の本文が透けると読めなくなるので紙色で塞ぎ、そのぶん罫線がこの帯だけ途切れる。
+   * 塞いだ面が平らだと別の紙が乗って見えるので、内側にも紙テクスチャを敷く
+   */
+  .sheet-head {
+    @apply sticky top-0 z-20 flex items-baseline bg-paper px-[14px] pt-4 pl-5 lg:px-[60px] lg:pt-[26px] lg:pl-10;
+    min-height: var(--rule-top);
+  }
+  .sheet-head > .paper-texture {
+    z-index: -1;
+  }
+  /*
+   * 赤いマージンラインは紙の上下いっぱいに通っているもの。
+   * 帯を紙色で塞ぐと一緒に消えてしまうので、ここにも引き直す
+   */
+  .sheet-head::after {
+    content: "";
+    @apply pointer-events-none absolute inset-y-0;
+    left: var(--margin-x);
+    width: 1.5px;
+    background: var(--color-margin-line);
+  }
+
+  /*
+   * 見出し欄（赤線の左）。1ページ1役割。
+   * 一覧・検索・自己紹介ではサイトの目次、記事詳細ではその記事の目次だけを置く
+   */
+  /*
+   * 紙の高さいっぱいに伸ばしておく。中の目次を sticky で追従させたいが、
+   * 器に高さが無いと sticky は動く余地を持てない
+   */
+  .margin-col {
+    @apply pointer-events-none absolute bottom-0 left-0 z-10 hidden flex-col text-[15px] text-green-soft lg:flex;
+    top: var(--rule-top);
+    width: var(--margin-x);
+    box-sizing: border-box;
+    padding: 22px 24px 0 66px;
+  }
+  /*
+   * 欄は紙の高さいっぱいに伸びているので、そのままだと左端 190px の
+   * クリックを全部吸ってしまう（prev の矢印が紙幅いっぱいに伸びていて下に入る）。
+   * 欄は素通しにして、実際に書いてある中身だけがクリックを受け取る
+   */
+  .margin-col > * {
+    @apply pointer-events-auto;
+  }
+  .margin-col a,
+  .margin-col span {
+    line-height: var(--line);
+  }
+  .margin-col a {
+    @apply w-fit text-green-soft;
+    transition: transform 0.2s;
+  }
+  .margin-col a:hover {
+    transform: translateX(3px);
+  }
+
+  /*
+   * 本文カラム。赤線の右から始まる。
+   * 上の余白は罫線の倍数にする。半端に空けると1行目から罫線に乗らない
+   */
+  .body-col {
+    @apply relative px-5 lg:pr-[60px];
+    padding-left: var(--body-x);
+    padding-top: var(--line);
+  }
+  @media (min-width: 1024px) {
+    .body-col {
+      max-width: calc(var(--body-x) + 780px);
+    }
+  }
+
+  /* ============================================================
+   * 文字の役
+   * ============================================================ */
+
+  /* posts / photos / contents のような小文字英語のラベル */
+  .label {
+    @apply font-label text-meta tracking-[0.18em] text-ink-soft;
+  }
+  .label-date {
+    @apply font-label text-meta-lg tracking-[0.14em] text-ink-soft;
+  }
+  /* 見出しの posts / tags / search */
+  .label-heading {
+    @apply font-label text-[29px] font-semibold tracking-[0.04em] text-ink-strong;
+  }
+
+  /* 1ページ1回だけの署名 */
+  .signature {
+    @apply font-sign text-[30px] leading-none text-green;
+    filter: url("#ink");
+  }
+
+  /* ============================================================
+   * 手書き（SVG は components/paper.tsx が描く。ここは器だけ）
+   * ============================================================ */
+
+  /* 手書きの四角で囲んだラベル。カテゴリ と note だけ
+   * 行間は本文の罫線を継がせない。継ぐと囲みが縦に伸びて紙のラベルに見えない */
+  .hand-box {
+    @apply relative inline-block px-[10px] py-[2px] text-[12.5px] leading-[1.4] text-green;
+  }
+  /*
+   * SVG は置換要素なので、inset:0 だけでは viewBox の縦横比から自然サイズが決まり、
+   * 器からはみ出す。幅と高さを明示して器に貼り付ける
+   */
+  .hand-box > svg {
+    @apply pointer-events-none absolute inset-0 h-full w-full overflow-visible;
+  }
+  .hand-box > span {
+    @apply relative;
+  }
+
+  /* 手書きの楕円囲み。サイト名と、見出し欄の現在地に使う */
+  .hand-ellipse {
+    @apply relative inline-block;
+  }
+  .hand-ellipse > svg {
+    @apply pointer-events-none absolute inset-0 h-full w-full overflow-visible;
+  }
+  .hand-ellipse > span {
+    @apply relative;
+  }
+
+  /* 手書きの下線（現在地）。文字の下に潜り込ませる */
+  .hand-underline {
+    @apply relative;
+  }
+  .hand-underline > svg {
+    @apply pointer-events-none absolute inset-x-0 bottom-[2px] h-[6px] w-full overflow-visible;
+  }
+
+  /* 手書きの罫線。幅に追従させるので preserveAspectRatio="none" 前提 */
+  .hand-rule {
+    @apply pointer-events-none block h-[9px] w-full overflow-visible;
+  }
+
+  /*
+   * 黄土のハイライト。蛍光ペンではなく色鉛筆のつもりなので、
+   * SVG の塗りではなく端の薄れる gradient で引く。行をまたいでも破綻しない
+   */
+  .mark-highlight {
+    @apply px-[3px];
+    background: var(--highlight-ochre);
+  }
+
+  /* ============================================================
+   * 写真
+   * ============================================================ */
+
+  /*
+   * 白フチの台紙には貼らない。紙に直接テープで留める。
+   * 傾きは1枚ずつ変えたいので、--tilt をインラインで渡す
+   */
+  .photo {
+    @apply relative block;
+    rotate: var(--tilt, -1.8deg);
+    transition: translate 0.28s var(--ease-paper);
+  }
+  .photo:hover {
+    translate: 0 -4px;
+  }
+  .photo-body {
+    @apply relative block;
+    box-shadow: var(--shadow-photo-lg);
+  }
+  .photo img {
+    @apply block h-auto w-full;
+  }
+
+  /* マスキングテープ。上辺2箇所、または上1＋下1 */
+  .tape {
+    @apply pointer-events-none absolute h-[19px];
+    background: var(--color-tape);
+    box-shadow: var(--shadow-tape);
+  }
+
+  /* 写真の下にペンで書いたキャプション */
+  .photo-caption {
+    @apply block px-[2px] pt-2 text-[13.5px] leading-normal text-ink;
+    rotate: 0.4deg;
+  }
+
+  /*
+   * 写真に乗せる粒。図解とスクショ（.plain）には掛けない。
+   * viewBox を持たない svg は幅高さを書かないと 300x150 で止まるので、器に合わせる
+   */
+  /* 繊維とインク溜まりは白フチの台紙あってのものなので、直貼りでは出さない */
+  .photo-grain {
+    @apply pointer-events-none absolute inset-0 h-full w-full;
+    opacity: 0.4;
+    mix-blend-mode: multiply;
+  }
+
+  /* ============================================================
+   * 一覧
+   * ============================================================ */
+
+  /*
+   * 一覧＝書き足していく索引。行は罫線に乗せる。
+   * 下敷きを敷くと罫線が隠れて紙に見えなくなるので、ホバーは横のずれだけにする
+   */
+  .post-row {
+    @apply flex items-baseline gap-4 text-ink;
+    line-height: var(--line);
+    transition: transform 0.2s;
+  }
+  .post-row:hover {
+    transform: translateX(4px);
+    color: var(--color-ink);
+  }
+  /* 日付は幅を揃える。揃わないとタイトルの頭が毎行ずれて索引に見えない */
+  .post-row time {
+    @apply shrink-0 text-[13.5px] text-ink-soft;
+    width: 64px;
+  }
+
+  /* ============================================================
+   * 本文
+   * ============================================================ */
+
+  /* 本文は罫線に乗る。段落の間も罫線の倍数で空ける（半端に空けると行がずれる） */
+  .prose-article {
+    @apply text-ink;
+    line-height: var(--line);
+  }
+
+  .prose-article p {
+    @apply my-0;
+  }
+  .prose-article p + p {
+    margin-top: var(--line);
+  }
+
+  /*
+   * 節見出しはエンジの短いチェック風ストローク＋Klee One 600。
+   * 前後の空きも罫線の倍数にする
+   */
   .prose-article h2 {
-    @apply text-phi-2xl font-bold mt-phi-5 mb-phi-3;
+    @apply flex items-baseline gap-[10px] text-h2 font-semibold text-ink-strong;
+    margin: calc(var(--line) * 2) 0 0;
+    rotate: -0.4deg;
   }
+  .prose-article h2::before {
+    content: "";
+    @apply inline-block h-[9px] w-[22px] shrink-0 self-center;
+    /* 短いチェックのストローク。SVG を毎回置くより軽い */
+    background:
+      linear-gradient(
+          to bottom right,
+          transparent 47%,
+          var(--color-crimson) 47% 62%,
+          transparent 62%
+        )
+        no-repeat left bottom / 9px 6px,
+      linear-gradient(to top right, transparent 40%, var(--color-crimson) 40% 55%, transparent 55%)
+        no-repeat right top / 14px 9px;
+  }
+
   .prose-article h3 {
-    @apply text-phi-xl font-bold mt-phi-4 mb-phi-2;
+    @apply text-h3 font-semibold text-ink-strong;
+    margin: calc(var(--line) * 1.5) 0 0;
   }
   .prose-article h4 {
-    @apply text-phi-lg font-bold mt-phi-3 mb-phi-2;
-  }
-
-  .prose-article blockquote {
-    @apply border-l-4 border-base-300 pl-phi-4 my-phi-4 text-base-content/70;
-  }
-
-  .prose-article table {
-    @apply w-full my-phi-4 border-collapse;
-  }
-  .prose-article th,
-  .prose-article td {
-    @apply border border-base-300 p-phi-2 text-left;
-  }
-  .prose-article th {
-    @apply bg-base-200;
-  }
-
-  .prose-article ul {
-    @apply pl-phi-5 my-phi-4 list-disc;
-  }
-  .prose-article ol {
-    @apply pl-phi-5 my-phi-4 list-decimal;
-  }
-  .prose-article li {
-    @apply my-phi-1;
-  }
-  .prose-article p {
-    @apply my-phi-4;
+    @apply text-h4 font-semibold text-ink-strong;
+    margin: var(--line) 0 0;
   }
 
   .prose-article a {
-    @apply link link-primary;
+    @apply text-green underline decoration-[rgb(31_61_43_/_0.35)] underline-offset-[5px];
+  }
+  .prose-article a:hover {
+    @apply text-crimson decoration-[rgb(140_28_43_/_0.5)];
   }
 
+  .prose-article ul {
+    @apply my-5 list-disc pl-6;
+  }
+  .prose-article ol {
+    @apply my-5 list-decimal pl-6;
+  }
+  .prose-article li {
+    @apply my-1;
+  }
+  .prose-article li::marker {
+    @apply text-green;
+  }
+
+  /* 引用はペン1本の縦線 */
+  .prose-article blockquote {
+    @apply my-6 border-l-2 border-[rgb(31_61_43_/_0.3)] pl-5 text-ink-body;
+  }
+
+  .prose-article table {
+    @apply my-6 w-full border-collapse text-body-sm;
+  }
+  .prose-article th,
+  .prose-article td {
+    @apply border border-[rgb(31_61_43_/_0.2)] px-3 py-2 text-left;
+  }
+  .prose-article th {
+    @apply bg-paper-2 font-semibold;
+  }
+
+  /* インラインコードは地の文より少し小さくして馴染ませる（背景は敷かない） */
   .prose-article code:not(pre code) {
-    @apply bg-base-200 px-phi-2 py-phi-1 rounded text-sm font-mono text-error;
+    @apply font-mono text-[13px] text-crimson;
+  }
+
+  .prose-article hr {
+    @apply my-9 border-0 border-t border-[rgb(31_61_43_/_0.22)];
   }
 
   .prose-article .heading-wrapper {
-    display: flex;
-    align-items: baseline;
+    @apply flex items-baseline;
   }
   .prose-article .heading-wrapper .header-anchor {
-    @apply ml-2 text-base-content/30 no-underline;
-    opacity: 0;
-    transition: opacity 0.2s;
+    @apply ml-2 font-label text-ink-faint no-underline opacity-0 transition-opacity;
   }
   .prose-article .heading-wrapper:hover .header-anchor,
   .prose-article .header-anchor:focus {
-    opacity: 1;
+    @apply opacity-100;
   }
-}
 
-/* Code block styles (Shiki) */
-pre.shiki {
-  position: relative;
-  counter-reset: line;
-  overflow-x: auto;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-}
-
-.code-block-wrapper {
-  @apply relative;
-}
-
-.code-block-wrapper .copy-button {
-  @apply absolute top-2 right-2 z-10 opacity-0 transition-opacity;
-}
-
-.code-block-wrapper:hover .copy-button {
-  @apply opacity-100;
-}
-
-.copy-button.copied {
-  @apply btn-success;
-}
-
-.code-title {
-  background: #1f2428;
-  color: #e1e4e8;
-  padding: 0.5rem 1rem;
-  font-size: 0.85rem;
-  border-bottom: 1px solid #444d56;
-  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-}
-
-pre.shiki .line::before {
-  counter-increment: line;
-  content: counter(line);
-  display: inline-block;
-  width: 2rem;
-  margin-right: 1rem;
-  text-align: right;
-  color: #6a737d;
-  user-select: none;
-}
-
-pre.shiki .line.diff.add {
-  background-color: rgba(46, 160, 67, 0.2);
-}
-pre.shiki .line.diff.add::before {
-  content: "+";
-  color: #3fb950;
-}
-
-pre.shiki .line.diff.remove {
-  background-color: rgba(248, 81, 73, 0.2);
-}
-pre.shiki .line.diff.remove::before {
-  content: "-";
-  color: #f85149;
-}
-
-pre.shiki .line.highlighted {
-  background-color: rgba(56, 139, 253, 0.15);
-}
-pre.shiki .line.highlighted.error {
-  background-color: rgba(248, 81, 73, 0.2);
-}
-pre.shiki .line.highlighted.warning {
-  background-color: rgba(210, 153, 34, 0.2);
-}
-
-/* OGP card styles */
-.ogp-card {
-  @apply flex bg-base-100 border border-base-300 rounded-lg overflow-hidden my-6 no-underline shadow-md transition-shadow;
-  min-height: 120px;
-}
-.ogp-card:hover {
-  @apply shadow-xl no-underline;
-}
-.ogp-image {
-  @apply flex items-center justify-center shrink-0 w-48 h-36 overflow-hidden bg-base-300;
-}
-.ogp-image img {
-  @apply w-full h-full object-cover;
-}
-.ogp-noimage {
-  @apply text-base-content/50 text-sm;
-}
-.ogp-content {
-  @apply flex-1 p-4 flex flex-col justify-center;
-}
-.ogp-title {
-  @apply block text-lg font-semibold mb-2 text-base-content;
-}
-.ogp-description {
-  @apply block text-sm text-base-content/70 mb-2 overflow-hidden text-ellipsis whitespace-nowrap;
-}
-.ogp-site {
-  @apply block text-xs text-base-content/50;
-}
-
-/* Auto-hide header on scroll (desktop only) */
-@media (min-width: 1024px) {
-  #header-wrapper[data-scrolled] {
-    opacity: 0;
-    pointer-events: none;
+  /*
+   * 本文の図版。テープ直貼りで、本文カラムから左へわざとはみ出す。
+   * 几帳面に収めるとメモの延長に見えない
+   */
+  .prose-article figure {
+    @apply mx-0;
+    margin-block: var(--line);
+    margin-left: -14px;
   }
-  /* Thin hover zone at viewport top to detect cursor */
-  #header-wrapper::before {
+  .prose-article figcaption {
+    @apply block px-[2px] pt-2 text-[13.5px] leading-normal text-ink;
+    rotate: 0.4deg;
+  }
+  /* 図解・スクリーンショットは素のまま（文字が読めなくなる）。傾けもしない */
+  .prose-article figure.plain {
+    @apply ml-0;
+  }
+  .prose-article figure.plain .photo {
+    rotate: none;
+  }
+  .prose-article figure.plain .photo-grain,
+  .prose-article figure.plain .tape {
+    @apply hidden;
+  }
+
+  /* ::: note — 手書きのボールペン枠。付箋（紙を貼る表現）は不採用 */
+  .prose-article .note {
+    @apply relative my-8 px-[22px] py-[18px] text-body-sm leading-[2.05] text-[#4a4028];
+  }
+  .prose-article .note > svg {
+    @apply pointer-events-none absolute inset-0 h-full w-full overflow-visible;
+  }
+  .prose-article .note > * {
+    @apply relative;
+  }
+  .prose-article .note::before {
+    content: "note";
+    @apply mb-2 block font-label text-meta-lg tracking-[0.14em] text-green;
+  }
+  .prose-article .note p:last-child {
+    @apply mb-0;
+  }
+
+  /* ============================================================
+   * コードブロック（印刷して貼った紙）
+   * 暗いターミナル配色は使わない。紙に暗い矩形が乗ると浮く。
+   * ============================================================ */
+
+  /*
+   * 印刷して貼った紙。
+   * 幅は中身に合わせず揃える。1枚ずつ幅が変わると、紙を貼った並びではなく
+   * ばらばらの箱が置かれているように見える。
+   * 短いコードで間延びしないよう、紙の高さは中身ぶんに留める
+   */
+  .code-block-wrapper {
+    @apply relative mb-[34px] w-full bg-paper-print pb-[10px];
+    transform: rotate(-0.5deg);
+    box-shadow: var(--shadow-stack);
+  }
+  /* 貼った紙にも同じ紙目を敷く。
+   * 地と同じ濃さだと 12.5px の等幅文字のエッジが潰れるので、かなり薄くする */
+  .code-block-wrapper::before {
     content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1rem;
-    pointer-events: auto;
+    @apply pointer-events-none absolute inset-0 z-0;
+    background-image: var(--paper-grain);
+    background-size: 300px 300px;
+    mix-blend-mode: multiply;
+    opacity: 0.16;
   }
-  #header-wrapper[data-scrolled]:hover,
-  #header-wrapper:focus-within {
-    opacity: 1;
-    pointer-events: auto;
+
+  /*
+   * 上辺に貼ったマスキングテープ。印刷して貼った紙なのでテープで留まっている。
+   * 写真と違って枚数が決まっているので、擬似要素2つで済ませる
+   */
+  .code-block-wrapper::after {
+    content: "";
+    @apply pointer-events-none absolute -top-[9px] left-[46px] z-10 h-[19px] w-[66px];
+    background: var(--color-tape);
+    box-shadow: var(--shadow-tape);
+    rotate: -3deg;
   }
-}
-
-/* Heading scroll offset for anchor links (mobile only, header stays visible) */
-@media (max-width: 1023px) {
-  .prose-article h2[id],
-  .prose-article h3[id],
-  .prose-article h4[id] {
-    scroll-margin-top: 5rem; /* navbar(4rem) + margin(1rem) */
+  .code-head::before {
+    content: "";
+    @apply pointer-events-none absolute -top-[9px] right-[60px] z-10 h-[19px] w-[60px];
+    background: var(--color-tape);
+    box-shadow: var(--shadow-tape);
+    rotate: 4deg;
   }
-}
 
-/* TOC active link */
-.toc-link.active {
-  @apply font-bold text-primary;
-}
+  /* ファイル名と copy の行。破線で区切る */
+  .code-head {
+    @apply relative z-1 flex items-center justify-between px-[14px] pt-[9px] pb-2 font-mono text-[11px] text-[#6f6656];
+    border-bottom: 1px dashed rgb(43 39 33 / 0.22);
+  }
+  .copy-button {
+    @apply cursor-pointer font-mono text-[11px] text-crimson;
+  }
+  .copy-button:hover {
+    @apply text-green;
+  }
+  .copy-button.copied {
+    @apply text-green;
+  }
 
-/* Post navigation */
-.post-nav {
-  @apply flex justify-between mt-8 pt-6 border-t border-base-300;
-}
-.post-nav a {
-  @apply link link-primary max-w-[45%];
-}
-.post-nav-prev {
-  @apply text-left;
-}
-.post-nav-next {
-  @apply text-right ml-auto;
-}
+  pre.shiki {
+    @apply relative z-1 m-0 overflow-x-auto p-[14px] text-code leading-[1.9];
+    counter-reset: line;
+    background: transparent !important;
+  }
 
-/* Mobile styles */
-@media (max-width: 640px) {
+  pre.shiki .line::before {
+    counter-increment: line;
+    content: counter(line);
+    @apply mr-4 inline-block w-6 text-right text-ink-faint select-none;
+  }
+
+  pre.shiki .line.diff.add {
+    background: rgb(31 61 43 / 0.1);
+  }
+  pre.shiki .line.diff.add::before {
+    content: "+";
+    @apply text-green;
+  }
+  pre.shiki .line.diff.remove {
+    background: rgb(140 28 43 / 0.1);
+  }
+  pre.shiki .line.diff.remove::before {
+    content: "-";
+    @apply text-crimson;
+  }
+  pre.shiki .line.highlighted {
+    background: rgb(200 149 47 / 0.18);
+  }
+  pre.shiki .line.highlighted.error {
+    background: rgb(140 28 43 / 0.14);
+  }
+  pre.shiki .line.highlighted.warning {
+    background: rgb(200 149 47 / 0.24);
+  }
+
+  /* ============================================================
+   * OGP カード（本文に貼るリンクカード）
+   * カードとシャドウをやめて、罫線1本の引用に寄せる
+   * ============================================================ */
+
   .ogp-card {
-    @apply flex-col;
+    @apply my-6 flex items-stretch gap-4 border border-[rgb(31_61_43_/_0.22)] bg-paper-2 no-underline;
+    min-height: 96px;
+    transition:
+      background 0.2s,
+      transform 0.2s;
+  }
+  .ogp-card:hover {
+    @apply no-underline;
+    background: rgb(253 250 241 / 0.9);
+    transform: translateX(3px);
   }
   .ogp-image {
-    @apply w-full h-44;
+    @apply flex h-[108px] w-40 shrink-0 items-center justify-center self-center overflow-hidden;
   }
-  pre.shiki .line::before {
+  .ogp-image img {
+    @apply h-full w-full object-cover;
+  }
+  .ogp-noimage {
+    @apply font-label text-meta text-ink-faint;
+  }
+  .ogp-content {
+    @apply flex flex-1 flex-col justify-center gap-1 py-3 pr-4;
+  }
+  .ogp-title {
+    @apply block text-[15px] leading-relaxed font-semibold text-ink-strong;
+  }
+  .ogp-description {
+    @apply block overflow-hidden text-[13px] leading-normal text-ellipsis whitespace-nowrap text-ink-body;
+  }
+  .ogp-site {
+    @apply block font-label text-meta tracking-[0.14em] text-ink-soft;
+  }
+
+  /* 狭い画面では横に並べると画像に幅を取られてタイトルが1文字ずつ折り返す */
+  @media (max-width: 640px) {
+    .ogp-card {
+      @apply flex-col gap-0;
+    }
+    .ogp-image {
+      @apply h-32 w-full;
+    }
+    .ogp-content {
+      @apply px-4 pt-0;
+    }
+  }
+
+  /* ============================================================
+   * 目次
+   * ============================================================ */
+
+  /* 見出し欄に置く記事の目次。現在地はエンジの手書き下線、罫線は引かない */
+  .toc-link {
+    @apply relative w-fit text-[14px] text-green-soft;
+    line-height: var(--line);
+  }
+  .toc-link.active {
+    @apply text-ink-strong;
+  }
+  .toc-link > svg {
+    @apply pointer-events-none absolute inset-x-0 bottom-[2px] h-[6px] w-full overflow-visible opacity-0;
+  }
+  .toc-link.active > svg {
+    @apply opacity-100;
+  }
+
+  /* ============================================================
+   * prev / next — 紙幅いっぱいの手書きの矢印
+   * ラベルは説明を付けず記事タイトルだけ
+   * ============================================================ */
+
+  .paper-nav {
+    @apply flex flex-col gap-[6px];
+    transition: transform 0.2s;
+  }
+  .paper-nav svg {
+    @apply block h-[26px] w-full max-w-[300px];
+  }
+  .paper-nav span {
+    @apply text-[17px] leading-snug font-semibold text-crimson;
+    filter: url("#ink");
+  }
+  .paper-nav-prev {
+    rotate: -0.5deg;
+  }
+  .paper-nav-prev span {
+    @apply pl-[30px];
+  }
+  .paper-nav-prev:hover {
+    transform: translateX(-4px);
+  }
+  .paper-nav-next {
+    @apply items-end;
+    rotate: 0.4deg;
+  }
+  .paper-nav-next span {
+    @apply pr-[30px] text-right;
+  }
+  .paper-nav-next:hover {
+    transform: translateX(4px);
+  }
+
+  /* ============================================================
+   * ライトボックス
+   * ============================================================ */
+
+  .lightbox {
+    @apply fixed inset-0 z-50 hidden items-center justify-center;
+    background: rgb(28 32 26 / 0.62);
+    backdrop-filter: blur(14px) saturate(0.9);
+  }
+  .lightbox[open],
+  .lightbox.is-open {
+    @apply flex;
+  }
+  /* 拡大は紙から剥がして手に取るところ。テープは付けない */
+  .lightbox img {
+    @apply max-h-[82vh] max-w-[86vw];
+    box-shadow: 0 30px 70px rgb(0 0 0 / 0.5);
+    rotate: 0.6deg;
+  }
+  .lightbox-bar {
+    @apply absolute bottom-8 flex items-center gap-4 px-5 py-2 font-label text-label text-paper;
+    background: rgb(246 241 228 / 0.16);
+    box-shadow: inset 0 0 0 1px rgb(246 241 228 / 0.28);
+  }
+  .lightbox-bar button {
+    @apply cursor-pointer text-paper;
+  }
+  .lightbox-close {
+    @apply absolute top-4 right-4 flex h-11 w-11 cursor-pointer items-center justify-center text-paper;
+  }
+}
+
+/*
+ * 紙の遷移。次のルーズリーフが右から差し込まれ、下の紙は少し沈む。
+ * ページ全体をめくる演出は不採用
+ */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: paper-sink 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+::view-transition-new(root) {
+  animation: paper-slide-in 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes paper-sink {
+  to {
+    transform: scale(0.985);
+  }
+}
+
+@keyframes paper-slide-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+/* 本文の見出しがヘッダーに隠れないように */
+.prose-article :is(h2, h3, h4)[id] {
+  scroll-margin-top: 5rem;
+}
+
+/* 印刷では紙の演出を外す。実際の紙に刷るので罫線も綴じ穴も要らない */
+@media print {
+  .paper-texture,
+  .photo-grain,
+  .tape,
+  .code-block-wrapper::before {
+    display: none !important;
+  }
+  .paper-sheet::before,
+  .paper-sheet::after {
     display: none;
   }
-  pre.shiki {
-    font-size: 0.8rem;
+  .photo,
+  .prose-article h2,
+  .code-block-wrapper {
+    rotate: none;
+  }
+  .code-block-wrapper {
+    transform: none;
+    box-shadow: none;
+    border: 1px solid rgb(43 39 33 / 0.3);
+  }
+  body {
+    background: #fff;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  @view-transition {
+    navigation: none;
+  }
+  .paper-texture,
+  .photo-grain {
+    display: none;
+  }
+  .photo,
+  .post-row,
+  .paper-nav,
+  .margin-col a,
+  .ogp-card {
+    transition: none;
+  }
+  .photo:hover {
+    translate: none;
+  }
+  .post-row:hover,
+  .paper-nav:hover,
+  .margin-col a:hover,
+  .ogp-card:hover {
+    transform: none;
   }
 }
