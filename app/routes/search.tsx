@@ -2,7 +2,7 @@ import { createRoute } from "honox/factory";
 import { Layout } from "../components/layout";
 import { HandRule } from "../components/paper";
 import { SITE_TITLE, SITE_URL } from "../lib/config";
-import { toShortEnglishDate } from "../lib/date";
+import { toSlashDate } from "../lib/date";
 import { getAllPosts } from "../lib/posts";
 
 /*
@@ -16,7 +16,7 @@ import { getAllPosts } from "../lib/posts";
 const buildPostIndex = (): string =>
   JSON.stringify(
     Object.fromEntries(
-      getAllPosts().map((post) => [post.slug, [post.category, toShortEnglishDate(post.createdAt)]]),
+      getAllPosts().map((post) => [post.slug, [post.category, toSlashDate(post.createdAt)]]),
     ),
   );
 
