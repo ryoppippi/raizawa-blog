@@ -106,9 +106,8 @@
               "node_modules/**"
               "dist/**"
               ".honox/**"
-              # デザインの受け渡し資料。中身は x-dc の独自要素で標準HTMLとして閉じておらず、
-              # 整形器にかけると構文エラーで落ちる。製品コードではないので触らせない
-              "design_handoff_paper_blog/**"
+              # デザインの受け渡し資料。こちらが書いたものではないので、
+              # 整形器で書き換えると受け取った版との差分が追えなくなる
               "design_handoff_looseleaf/**"
             ];
             programs.nixfmt.enable = true;
