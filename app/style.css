@@ -107,6 +107,17 @@
     --margin-x: 44px;
     --body-x: 64px;
     --line: 33px; /* --rule-pitch + 1px */
+
+    /*
+     * 紙の質感。300px のタイルの中でフィルターを完結させて敷き詰める。
+     *
+     * 要素に filter: url(#paper) を直接掛けると、紙の高さぶん(長い記事だと4000px超)を
+     * 1枚で覆おうとしてブラウザのフィルター領域の上限に当たり、質感の掛かっていない
+     * 矩形が途中に残る。かといって固定にすると紙と一緒にスクロールせず、
+     * 質感だけ画面に貼り付いて見える。タイルなら上限にも当たらず紙にも付いてくる。
+     * stitchTiles="stitch" があるので継ぎ目は出ない
+     */
+    --paper-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.12' numOctaves='4' seed='3' stitchTiles='stitch' result='n'/%3E%3CfeDiffuseLighting in='n' lighting-color='%23fdfaf1' surfaceScale='1.1'%3E%3CfeDistantLight azimuth='225' elevation='65'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)'/%3E%3C/svg%3E");
   }
 
   @media (min-width: 1024px) {
@@ -205,20 +216,13 @@
     background-repeat: repeat-y;
   }
 
-  /*
-   * 紙の地。#paper フィルターを multiply で1枚敷く。
-   * これが content より下に来るよう、中身側は .paper-layer を付ける。
-   *
-   * 紙の高さぶん(長い記事だと4000px超)を1枚のフィルターで覆おうとすると、
-   * ブラウザがフィルター領域の上限で打ち切って、質感の掛かっていない矩形が
-   * 紙の途中に残る。ビューポート分だけ描いて固定すれば上限に当たらない。
-   * 粒はランダムなので、紙と一緒に流れなくても見分けはつかない
-   */
+  /* 紙の地。content より下に来るよう、中身側は .paper-layer を付ける */
   .paper-texture {
-    position: fixed;
+    position: absolute;
     inset: 0;
     z-index: 0;
-    filter: url("#paper");
+    background-image: var(--paper-grain);
+    background-size: 300px 300px;
     mix-blend-mode: multiply;
     opacity: 0.5;
     pointer-events: none;
@@ -243,9 +247,7 @@
     @apply sticky top-0 z-20 flex items-baseline bg-paper px-[14px] pt-4 pl-5 lg:px-[60px] lg:pt-[26px] lg:pl-10;
     min-height: var(--rule-top);
   }
-  /* 帯は 112px しかないのでフィルターの上限に当たらない。地と違って絶対配置のまま */
   .sheet-head > .paper-texture {
-    position: absolute;
     z-index: -1;
   }
   /*
@@ -418,19 +420,11 @@
    * 写真に乗せる粒。図解とスクショ（.plain）には掛けない。
    * viewBox を持たない svg は幅高さを書かないと 300x150 で止まるので、器に合わせる
    */
-  .photo-grain,
-  .photo-fiber,
-  .photo-well {
-    @apply pointer-events-none absolute inset-0 h-full w-full;
-  }
+  /* 繊維とインク溜まりは白フチの台紙あってのものなので、直貼りでは出さない */
   .photo-grain {
+    @apply pointer-events-none absolute inset-0 h-full w-full;
     opacity: 0.4;
     mix-blend-mode: multiply;
-  }
-  /* 繊維とインク溜まりは白フチの台紙あってのものなので、直貼りでは出さない */
-  .photo-fiber,
-  .photo-well {
-    display: none;
   }
 
   /* ============================================================
@@ -611,18 +605,26 @@
    * 暗いターミナル配色は使わない。紙に暗い矩形が乗ると浮く。
    * ============================================================ */
 
+  /*
+   * 印刷して切って貼った紙。
+   * 幅を中身に合わせるのが要点で、本文カラムいっぱいに広げると
+   * 2行のコードでも巨大な空白の四角になり、紙ではなく「透明な箱」に見える。
+   * ファイル名と copy を左右に振るぶんの最小幅だけ確保する
+   */
   .code-block-wrapper {
-    @apply relative mb-[34px] bg-paper-print pb-[10px];
+    @apply relative mb-[34px] w-fit max-w-full min-w-[min(22rem,100%)] bg-paper-print pb-[10px];
     transform: rotate(-0.5deg);
     box-shadow: var(--shadow-stack);
   }
-  /* 貼った紙にも同じ紙目を敷く（地よりは薄く） */
+  /* 貼った紙にも同じ紙目を敷く。
+   * 地と同じ濃さだと 12.5px の等幅文字のエッジが潰れるので、かなり薄くする */
   .code-block-wrapper::before {
     content: "";
     @apply pointer-events-none absolute inset-0 z-0;
-    filter: url("#paper");
+    background-image: var(--paper-grain);
+    background-size: 300px 300px;
     mix-blend-mode: multiply;
-    opacity: 0.4;
+    opacity: 0.16;
   }
 
   /*

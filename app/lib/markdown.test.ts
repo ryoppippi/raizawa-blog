@@ -50,6 +50,13 @@ describe("markdown rendering", () => {
       expect(html).toContain("x");
     });
 
+    it("should not leave a trailing blank line", async () => {
+      // コードフェンスの中身は必ず改行で終わるので、そのまま渡すと空の行が1本余る
+      const { html } = await renderMarkdown("```rust\nlet x = 1;\n```");
+      const lineCount = (html.match(/class="line"/gu) ?? []).length;
+      expect(lineCount).toBe(1);
+    });
+
     it("should handle multiple lines code (N)", async () => {
       const markdown = "```rust\nlet x = 1;\nlet y = 2;\nlet z = 3;\n```";
       const { html } = await renderMarkdown(markdown);

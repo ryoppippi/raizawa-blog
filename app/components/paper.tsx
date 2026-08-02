@@ -9,32 +9,17 @@ import type { Child, FC } from "hono/jsx";
  */
 
 /*
- * 紙の質感の定義。全ページで共有するので Layout が1回だけ描く。
- * CSS 側は filter: url(#paper) のように id で参照する。
+ * 写真の粒と、見出し・署名のインク沈みの定義。全ページで共有するので Layout が1回だけ描く。
+ * CSS 側は filter: url(#ink) のように id で参照する。
+ * 紙の地の質感はここではなく style.css の --paper-grain（タイル）が持つ。
+ * 要素へ直接掛けるとフィルター領域の上限に当たって途中で切れるため
  */
 const PaperFilters: FC = () => (
   <svg width="0" height="0" class="absolute" aria-hidden="true">
     <title>paper texture filters</title>
-    {/* 紙の表面（上質紙）：乱流を高さマップにして斜め225°から照らす */}
-    <filter id="paper">
-      <feTurbulence type="fractalNoise" baseFrequency="0.12" numOctaves="4" seed="3" result="n" />
-      <feDiffuseLighting in="n" lighting-color="#fdfaf1" surfaceScale="1.1">
-        <feDistantLight azimuth="225" elevation="65" />
-      </feDiffuseLighting>
-    </filter>
     {/* 写真に乗せる粒 */}
     <filter id="grain">
       <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch" />
-      <feColorMatrix type="saturate" values="0" />
-    </filter>
-    {/* 縦の繊維 */}
-    <filter id="fiber">
-      <feTurbulence
-        type="fractalNoise"
-        baseFrequency="0.02 0.9"
-        numOctaves="3"
-        stitchTiles="stitch"
-      />
       <feColorMatrix type="saturate" values="0" />
     </filter>
     {/* 見出しと署名のインク沈み */}

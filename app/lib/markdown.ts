@@ -64,7 +64,8 @@ const initShiki = async (): Promise<void> => {
     if (token === undefined) {
       return "";
     }
-    const code = token.content;
+    // コードフェンスの中身は必ず改行で終わる。そのまま渡すと貼った紙の末尾に空の行が1本余る
+    const code = token.content.replace(/\n$/u, "");
     const lang = getLangFromTokenInfo(token.info);
     const meta = token.info.slice(lang.length).trim();
     const langToUse = resolveLang(lang, highlighter.getLoadedLanguages());
