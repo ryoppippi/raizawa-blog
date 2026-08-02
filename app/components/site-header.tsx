@@ -1,7 +1,7 @@
 import type { Child, FC } from "hono/jsx";
 import { HandEllipse } from "./hand-boxes";
 import { HandRule, PaperTexture } from "./paper";
-import { NAV_TOGGLE_ID } from "../lib/config";
+import { NAV_TOGGLE_ID, SITE_TITLE } from "../lib/config";
 
 /*
  * 見出し欄（赤線の左）の現在地。
@@ -30,15 +30,15 @@ const Logo: FC<{ small?: boolean }> = ({ small = false }) => {
         class="font-label text-[15px] tracking-[0.12em] text-ink-strong"
         style="rotate: -0.6deg"
       >
-        r-aizawa
+        {SITE_TITLE}
       </a>
     );
   }
   return (
     <a href="/" style="rotate: -1deg">
-      <HandEllipse stroke="green" twice class="px-[18px] py-2">
-        <span class="font-label text-[24px] leading-none tracking-[0.16em] text-ink-strong">
-          r-aizawa
+      <HandEllipse stroke="green" twice wide class="px-[18px] py-2">
+        <span class="font-label text-[24px] leading-none tracking-[0.16em] whitespace-nowrap text-ink-strong">
+          {SITE_TITLE}
         </span>
       </HandEllipse>
     </a>

@@ -22,7 +22,6 @@
   --color-paper: #f6f1e4; /* 紙（地・ヘッダー） */
   --color-paper-2: #fdfaf1; /* 紙（二次面） */
   --color-paper-print: #fdfcf7; /* 印刷して貼った紙（コードブロック） */
-  --color-desk: #ddd7c6; /* 綴じ穴の向こう側 */
   --color-tape: rgb(235 226 196 / 0.78); /* マスキングテープ */
   --color-rule: rgb(106 124 138 / 0.26); /* ルーズリーフの罫線 */
   --color-margin-line: rgb(140 28 43 / 0.4); /* 赤いマージンライン */
@@ -196,24 +195,6 @@
     left: var(--margin-x);
     width: 1.5px;
     background: var(--color-margin-line);
-  }
-
-  /*
-   * 綴じ穴。デザインは3つ固定だが、記事の長さで紙は伸びるので
-   * 一定間隔で繰り返す。inset shadow は gradient で描けないので、
-   * 影を少しずらした2枚目の円で代わりにする
-   */
-  .binder-holes {
-    @apply pointer-events-none absolute z-0 hidden w-[17px] lg:block;
-    left: 44px;
-    top: 260px;
-    bottom: 40px;
-    /* 先に書いた層が上に来る。穴の面を上、落ちる影を下に置く */
-    background-image:
-      radial-gradient(circle at 8.5px 8.5px, var(--color-desk) 0 8.5px, transparent 8.5px),
-      radial-gradient(circle at 9.5px 10.5px, rgb(43 39 33 / 0.35) 0 8.5px, transparent 8.5px);
-    background-size: 17px 270px;
-    background-repeat: repeat-y;
   }
 
   /* 紙の地。content より下に来るよう、中身側は .paper-layer を付ける */
@@ -880,7 +861,6 @@
 @media print {
   .paper-texture,
   .photo-grain,
-  .binder-holes,
   .tape,
   .code-block-wrapper::before {
     display: none !important;

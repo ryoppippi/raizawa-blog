@@ -18,18 +18,34 @@ const scrollspyScript = `{
   const tocLinks = document.querySelectorAll('.toc-link');
   const headings = document.querySelectorAll('article h2[id], article h3[id], article h4[id]');
   if (tocLinks.length > 0 && headings.length > 0) {
+    const activate = (id) => {
+      tocLinks.forEach((link) => { link.classList.remove('active'); });
+      const selector = '.toc-link[href="#' + CSS.escape(id) + '"]';
+      document.querySelectorAll(selector).forEach((link) => { link.classList.add('active'); });
+    };
+
     const topGap = window.matchMedia('(min-width: 1024px)').matches ? '0px' : '-80px';
     const observer = new IntersectionObserver((entries) => {
       for (const entry of entries) {
         if (entry.isIntersecting) {
-          tocLinks.forEach((link) => { link.classList.remove('active'); });
-          const selector = '.toc-link[href="#' + CSS.escape(entry.target.id) + '"]';
-          document.querySelectorAll(selector).forEach((link) => { link.classList.add('active'); });
+          activate(entry.target.id);
         }
       }
     }, { rootMargin: topGap + ' 0px -80% 0px' });
 
     headings.forEach((heading) => { observer.observe(heading); });
+
+    /*
+     * 最後の節は、後ろに画面の8割ぶんの中身が無いと判定の帯（上から20%）へ到達せず、
+     * 読み終えても現在地が手前の節に残る。紙の下端まで来たら最後の節に印を移す
+     */
+    const last = headings[headings.length - 1];
+    addEventListener('scroll', () => {
+      const atBottom = innerHeight + Math.ceil(scrollY) >= document.documentElement.scrollHeight - 2;
+      if (atBottom) {
+        activate(last.id);
+      }
+    }, { passive: true });
   }
 }`;
 

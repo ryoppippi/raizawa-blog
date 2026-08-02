@@ -77,45 +77,59 @@ const ELLIPSE_OUTER =
   "M38 4.4 C 60 3.2, 74 8.6, 73 17 C 72 26, 56 30.6, 37 29.8 C 17 29, 3 25.4, 4 16.4 C 5 8, 18 5.4, 38 4.4 Z";
 const ELLIPSE_SECOND = "M36 6.6 C 56 5.2, 71 9, 70.6 16";
 
+/*
+ * 横長の楕円。サイト名のように中身が長いとき用。
+ * 短い楕円を横へ引き伸ばすと上下の弧だけ平らになって形が崩れる
+ */
+const WIDE_OUTER =
+  "M80 3 C 128 1, 158 8, 156 22 C 154 37, 120 42.4, 78 41 C 34 39.6, 3 35, 4.6 21 C 6 8, 36 4.6, 80 3 Z";
+const WIDE_SECOND = "M76 5.6 C 118 3.8, 150 9, 149 20";
+
+/* 中身の長さで楕円の形を選ぶ。三項演算子は禁止なので関数に出す */
+const ellipseShapeOf = (wide: boolean): { box: string; outer: string; second: string } => {
+  if (wide) {
+    return { box: "0 0 160 44", outer: WIDE_OUTER, second: WIDE_SECOND };
+  }
+  return { box: "0 0 76 34", outer: ELLIPSE_OUTER, second: ELLIPSE_SECOND };
+};
+
 const HandEllipse: FC<{
   children: Child;
   stroke?: "green" | "crimson";
   /* 二度書きを重ねる。サイト名だけ */
   twice?: boolean;
+  /* サイト名のように中身が長いとき */
+  wide?: boolean;
   class?: string;
-}> = ({ children, stroke = "crimson", twice = false, class: className = "" }) => (
-  <span class={`hand-ellipse ${className}`}>
-    <svg viewBox="0 0 76 34" preserveAspectRatio="none" aria-hidden="true">
-      <path
-        d={ELLIPSE_OUTER}
-        fill="none"
-        stroke={strokeColorOf(stroke)}
-        stroke-width="1.6"
-        stroke-linecap="round"
-        vector-effect="non-scaling-stroke"
-      />
-      {twice && (
+}> = ({ children, stroke = "crimson", twice = false, wide = false, class: className = "" }) => {
+  const shape = ellipseShapeOf(wide);
+  return (
+    <span class={`hand-ellipse ${className}`}>
+      <svg viewBox={shape.box} preserveAspectRatio="none" aria-hidden="true">
         <path
-          d={ELLIPSE_SECOND}
+          d={shape.outer}
           fill="none"
           stroke={strokeColorOf(stroke)}
-          stroke-width=".9"
-          opacity=".4"
+          stroke-width="1.6"
           stroke-linecap="round"
           vector-effect="non-scaling-stroke"
         />
-      )}
-    </svg>
-    <span>{children}</span>
-  </span>
-);
-
-/*
- * マスキングテープの JSX 版は置かない。
- * いま写真を貼るのは本文の figure だけで、markdown-it のレンダラは文字列しか
- * 返せず JSX の部品を呼べない。二重に持つと貼り方がずれるので、
- * markdown-it-figure.ts の TAPES 一本にしてある
- */
+        {twice && (
+          <path
+            d={shape.second}
+            fill="none"
+            stroke={strokeColorOf(stroke)}
+            stroke-width=".9"
+            opacity=".4"
+            stroke-linecap="round"
+            vector-effect="non-scaling-stroke"
+          />
+        )}
+      </svg>
+      <span>{children}</span>
+    </span>
+  );
+};
 
 /* 深緑のゴム印。rss に使う */
 const HandStamp: FC<{ children: Child; fill?: "green" | "ochre"; class?: string }> = ({

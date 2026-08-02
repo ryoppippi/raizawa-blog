@@ -96,7 +96,6 @@ const Layout: FC<LayoutProps> = ({
       <PaperFilters />
       <div class="paper-sheet">
         <PaperTexture />
-        <div class="binder-holes" aria-hidden="true" />
         {/* モバイルメニューの開閉。peer なので後ろの兄弟から peer-checked で参照する */}
         <input id={NAV_TOGGLE_ID} type="checkbox" class="peer sr-only" aria-hidden="true" />
         <SiteHeader headNote={headNote} readingMinutes={readingMinutes} />
