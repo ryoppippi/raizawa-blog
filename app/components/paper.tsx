@@ -1,4 +1,4 @@
-import type { Child, FC } from "hono/jsx";
+import type { FC } from "hono/jsx";
 
 /*
  * 紙とインクの部品。
@@ -132,13 +132,10 @@ const HandUnderline: FC<{ class?: string }> = ({ class: className = "" }) => (
 );
 
 /*
- * 黄土のハイライト。蛍光ペンではなく色鉛筆のつもりなので、
- * SVG の塗りをやめて端の薄れる gradient にした（CSS の .mark-highlight）。
- * 行をまたいでも破綻しないという利点もある
+ * 黄土のハイライトの部品はここには置かない。
+ * 本文へ書き込む手段（`==語==` のような記法）がまだ無く、置いても呼び手がいない。
+ * 下敷き自体は CSS の .mark-highlight にあるので、#74 でそこへ繋ぐ
  */
-const HandHighlight: FC<{ children: Child }> = ({ children }) => (
-  <span class="mark-highlight">{children}</span>
-);
 
 /*
  * 写真に重ねる粒・繊維・インク溜まりの JSX 版はここには置かない。
@@ -161,4 +158,4 @@ const Signature: FC<{ class?: string }> = ({ class: className = "" }) => (
   </span>
 );
 
-export { HandHighlight, HandRule, HandUnderline, PaperFilters, PaperTexture, Signature };
+export { HandRule, HandUnderline, PaperFilters, PaperTexture, Signature };

@@ -2,27 +2,21 @@ import type { FC } from "hono/jsx";
 import { createRoute } from "honox/factory";
 import { Layout } from "../components/layout";
 import { ExternalArrow } from "../components/hand-arrows";
-import { HandHighlight, HandUnderline, Signature } from "../components/paper";
+import { Signature } from "../components/paper";
 import { ELSEWHERE_LINKS, SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "../lib/config";
 
 /*
  * トップは自己紹介。見出し欄の「自己紹介」とヘッダーのロゴがどちらも "/" を指すので、
  * /about は別に作らずこの1枚に寄せる。
+ *
+ * 本文はまだ書けていない。デザイン案の文言をそのまま置くと、
+ * 書いていないことが書いてあるように読めるので置かない
  */
-
-const FAVORITES: string[] = [
-  "ストリートファイター、鉄拳、EVO",
-  "尾崎紀世彦、クリスタルキング、遠藤正明",
-  "古着、ラルフローレン、コロンビア",
-  "ショーシャンクの空に、グレイテストショーマン",
-  "クウガ、アギト、龍騎、ファイズ",
-  "カウボーイビバップ、遊戯王、WWE",
-];
 
 /*
  * 補足の枠。このページ唯一の囲み。
  * 共通の HandBox は viewBox 100x32 なので、横長に引き伸ばすと角の形が崩れる。
- * README「7. 横長の手書き枠は横長の viewBox で」に従って専用の path を使う
+ * 「横長の手書き枠は横長の viewBox で」に従って専用の path を使う
  */
 const NoteFrame: FC = () => (
   <svg
@@ -51,19 +45,6 @@ const NoteFrame: FC = () => (
   </svg>
 );
 
-/* 節見出しのチェック風ストローク。prose の外なのでここで描く */
-const CheckStroke: FC = () => (
-  <svg width="26" height="20" viewBox="0 0 26 20" class="shrink-0" aria-hidden="true">
-    <path
-      d="M3 14 C 8 6, 18 4, 24 8"
-      fill="none"
-      stroke="#8c1c2b"
-      stroke-width="1.6"
-      stroke-linecap="round"
-    />
-  </svg>
-);
-
 export default createRoute((c) => {
   const jsonLd = {
     "@context": "https://schema.org",
@@ -88,34 +69,12 @@ export default createRoute((c) => {
               class="text-[26px] leading-[calc(var(--line)*2)] font-semibold text-ink-strong lg:text-[30px]"
               style="filter: url(#ink); rotate: -0.3deg"
             >
-              相沢と申します
+              r-aizawa
             </h1>
 
-            <p>
-              Rustを書いて暮らしている。<HandHighlight>格ゲーと写真</HandHighlight>
-              のためにブログを分けるのはやめて、全部この紙に書くことにした。
+            <p class="text-ink-soft" style="rotate: -0.4deg">
+              考え中...
             </p>
-            <p>
-              ここは
-              <span class="hand-underline">
-                メモの延長
-                <HandUnderline />
-              </span>
-              なので、きれいにまとまっていないことのほうが多い。書き直すときは取消線で残す。
-            </p>
-
-            <h2
-              class="flex items-baseline gap-[10px] pt-[calc(var(--line)*2)] text-[20px] font-semibold text-ink-strong"
-              style="rotate: -0.4deg"
-            >
-              <CheckStroke />
-              好きなもの
-            </h2>
-            <div class="grid sm:grid-cols-2 sm:gap-x-10">
-              {FAVORITES.map((favorite) => (
-                <span key={favorite}>{favorite}</span>
-              ))}
-            </div>
 
             {/* このページ唯一の囲み */}
             <div class="relative mt-9 max-w-[640px] px-[26px] py-[18px]">
