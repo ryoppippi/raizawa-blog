@@ -205,10 +205,17 @@
     background-repeat: repeat-y;
   }
 
-  /* 紙の地。#paper フィルターを multiply で1枚敷く。
-   * これが content より下に来るよう、中身側は .paper-layer を付ける */
+  /*
+   * 紙の地。#paper フィルターを multiply で1枚敷く。
+   * これが content より下に来るよう、中身側は .paper-layer を付ける。
+   *
+   * 紙の高さぶん(長い記事だと4000px超)を1枚のフィルターで覆おうとすると、
+   * ブラウザがフィルター領域の上限で打ち切って、質感の掛かっていない矩形が
+   * 紙の途中に残る。ビューポート分だけ描いて固定すれば上限に当たらない。
+   * 粒はランダムなので、紙と一緒に流れなくても見分けはつかない
+   */
   .paper-texture {
-    position: absolute;
+    position: fixed;
     inset: 0;
     z-index: 0;
     filter: url("#paper");
@@ -236,8 +243,21 @@
     @apply sticky top-0 z-20 flex items-baseline bg-paper px-[14px] pt-4 pl-5 lg:px-[60px] lg:pt-[26px] lg:pl-10;
     min-height: var(--rule-top);
   }
+  /* 帯は 112px しかないのでフィルターの上限に当たらない。地と違って絶対配置のまま */
   .sheet-head > .paper-texture {
+    position: absolute;
     z-index: -1;
+  }
+  /*
+   * 赤いマージンラインは紙の上下いっぱいに通っているもの。
+   * 帯を紙色で塞ぐと一緒に消えてしまうので、ここにも引き直す
+   */
+  .sheet-head::after {
+    content: "";
+    @apply pointer-events-none absolute inset-y-0;
+    left: var(--margin-x);
+    width: 1.5px;
+    background: var(--color-margin-line);
   }
 
   /*
