@@ -53,8 +53,9 @@ const TocList: FC<{ items: TocItem[] }> = ({ items }) => (
   </nav>
 );
 
+// 目次は補助動線。本文より弱く見せたいので影ではなく罫線で囲む。
 const MobileToc: FC<{ items: TocItem[] }> = ({ items }) => (
-  <details class="collapse collapse-arrow bg-base-100 shadow-sm mb-6 lg:hidden">
+  <details class="collapse collapse-arrow bg-base-100 border border-base-300 rounded-lg mb-6 lg:hidden">
     <summary class="collapse-title font-bold">目次</summary>
     <div class="collapse-content">
       <TocList items={items} />

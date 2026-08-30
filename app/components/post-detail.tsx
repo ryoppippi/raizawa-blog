@@ -73,33 +73,33 @@ const PostNav: FC<{
   );
 };
 
-const PostHeader: FC<{ meta: PostMeta; pagefindBody: boolean }> = ({ meta, pagefindBody }) => (
-  <header class="card bg-base-100 shadow-sm mb-6" data-pagefind-body={pagefindBody || undefined}>
-    <div class="card-body p-6">
-      <h1 class="text-2xl sm:text-3xl font-bold">{meta.title}</h1>
-      <div class="text-sm opacity-70 mt-1">
-        <time>{new Date(meta.createdAt).toLocaleDateString("ja-JP")}</time>
-        <UpdatedAt createdAt={meta.createdAt} updatedAt={meta.updatedAt} />
-        {meta.category !== "" && (
-          <span>
-            {" "}
-            •{" "}
-            <a href={`/category/${meta.category}`} class="link link-hover">
-              {meta.category}
-            </a>
-          </span>
-        )}
-      </div>
-      {meta.tags.length > 0 && (
-        <div class="flex flex-wrap gap-2 mt-3">
-          {meta.tags.map((tag) => (
-            <a class="badge badge-primary badge-outline" key={tag} href={`/tag/${tag}`}>
-              {tag}
-            </a>
-          ))}
-        </div>
+// タイトルと本文はひと続きの記事なので、別々の箱に分けず
+// 1枚の紙の中で罫線だけで区切る。
+const PostHeader: FC<{ meta: PostMeta }> = ({ meta }) => (
+  <header class="mb-6 pb-6 border-b border-base-300">
+    <h1 class="text-2xl sm:text-3xl font-bold">{meta.title}</h1>
+    <div class="text-sm opacity-70 mt-1">
+      <time>{new Date(meta.createdAt).toLocaleDateString("ja-JP")}</time>
+      <UpdatedAt createdAt={meta.createdAt} updatedAt={meta.updatedAt} />
+      {meta.category !== "" && (
+        <span>
+          {" "}
+          •{" "}
+          <a href={`/category/${meta.category}`} class="link link-hover">
+            {meta.category}
+          </a>
+        </span>
       )}
     </div>
+    {meta.tags.length > 0 && (
+      <div class="flex flex-wrap gap-2 mt-3">
+        {meta.tags.map((tag) => (
+          <a class="badge badge-primary badge-outline" key={tag} href={`/tag/${tag}`}>
+            {tag}
+          </a>
+        ))}
+      </div>
+    )}
   </header>
 );
 
@@ -140,12 +140,10 @@ const PostDetail: FC<PostDetailProps> = ({
       wide={shouldShowToc(post.toc)}
     >
       <TocLayout items={post.toc}>
-        <PostHeader meta={post.meta} pagefindBody={pagefindBody} />
-        <article class="card bg-base-100 shadow-sm" data-pagefind-body={pagefindBody || undefined}>
-          <div
-            class="card-body p-6 prose-article"
-            dangerouslySetInnerHTML={{ __html: post.html }}
-          ></div>
+        {/* 読むための面。押せないので影は付けない */}
+        <article class="bg-base-100 rounded-lg p-6" data-pagefind-body={pagefindBody || undefined}>
+          <PostHeader meta={post.meta} />
+          <div class="prose-article" dangerouslySetInnerHTML={{ __html: post.html }}></div>
         </article>
         <PostNav linkPrefix={linkPrefix} next={next} prev={prev} />
       </TocLayout>
