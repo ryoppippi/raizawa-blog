@@ -1,6 +1,4 @@
 import anchor from "markdown-it-anchor";
-import { figurePlugin } from "./markdown-it-figure";
-import { notePlugin } from "./markdown-it-note";
 import { preprocessOgpCards } from "./markdown-it-ogp-card";
 import { SHIKI_THEME, getHighlighter, shikiTransformers } from "./shiki";
 import type { RenderResult, TocItem } from "./toc";
@@ -8,9 +6,6 @@ import MarkdownIt from "markdown-it";
 
 // Initialize markdown-it
 const md = MarkdownIt({ breaks: true, html: true });
-
-md.use(figurePlugin);
-md.use(notePlugin);
 
 let currentTocItems: TocItem[] = [];
 
@@ -27,8 +22,7 @@ md.use(anchor, {
     class: "header-anchor",
     placement: "after",
     style: "aria-label",
-    // 生の # は検索の抜粋に見出しの数だけ紛れ込むので索引から外す
-    symbol: "<span data-pagefind-ignore>#</span>",
+    symbol: "#",
     wrapper: ['<div class="heading-wrapper">', "</div>"],
   }),
 });
@@ -64,8 +58,7 @@ const initShiki = async (): Promise<void> => {
     if (token === undefined) {
       return "";
     }
-    // コードフェンスの中身は必ず改行で終わる。そのまま渡すと貼った紙の末尾に空の行が1本余る
-    const code = token.content.replace(/\n$/u, "");
+    const code = token.content;
     const lang = getLangFromTokenInfo(token.info);
     const meta = token.info.slice(lang.length).trim();
     const langToUse = resolveLang(lang, highlighter.getLoadedLanguages());
