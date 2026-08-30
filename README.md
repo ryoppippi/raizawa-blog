@@ -52,11 +52,8 @@ bun run verify
 | `bun run knip`         | 使われていない export・ファイル・依存  |
 | `bun run test`         | vitest                                 |
 
-記事の文章は CI では見ない。気になったときに目安として手元で叩く。
-
-```bash
-bun run post-check
-```
+記事の文章は CI では見ない。textlint と typos は devShell に入れてあるので、
+エディタ（nvim の LSP、textlint の MCP サーバ）から書きながら見る。
 
 ## Format
 
