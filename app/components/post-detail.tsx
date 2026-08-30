@@ -1,6 +1,8 @@
 import type { FC } from "hono/jsx";
 import { SITE_TITLE, SITE_URL } from "../lib/config";
 import type { Post, PostMeta } from "../lib/posts";
+import { Breadcrumbs } from "./breadcrumbs";
+import type { Crumb } from "./breadcrumbs";
 import { Layout } from "./layout";
 import { TocLayout, shouldShowToc } from "./toc";
 import { UpdatedAt } from "./updated-at";
@@ -104,6 +106,7 @@ const PostHeader: FC<{ meta: PostMeta }> = ({ meta }) => (
 );
 
 interface PostDetailProps {
+  breadcrumbs?: Crumb[];
   linkPrefix: string;
   next: PostMeta | undefined;
   ogUrl: string;
@@ -113,6 +116,7 @@ interface PostDetailProps {
 }
 
 const PostDetail: FC<PostDetailProps> = ({
+  breadcrumbs = [],
   linkPrefix,
   next,
   ogUrl,
@@ -140,6 +144,7 @@ const PostDetail: FC<PostDetailProps> = ({
       wide={shouldShowToc(post.toc)}
     >
       <TocLayout items={post.toc}>
+        {breadcrumbs.length > 0 && <Breadcrumbs items={breadcrumbs} />}
         {/* 読むための面。押せないので影は付けない */}
         <article class="bg-base-100 rounded-lg p-6" data-pagefind-body={pagefindBody || undefined}>
           <PostHeader meta={post.meta} />
