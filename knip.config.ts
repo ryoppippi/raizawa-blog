@@ -8,7 +8,7 @@ const config: KnipConfig = {
   entry: ["app/routes/**/*.{ts,tsx}", "app/server.ts", "app/**/*.d.ts", "app/style.css"],
   project: ["app/**/*.{ts,tsx,css}", "scripts/**/*.ts", "test/**/*.ts", "*.ts"],
   // これらはpackage.jsonではなくflake.nixのtoolchainが用意する
-  ignoreBinaries: ["oxlint", "nix", "textlint", "typos", "tsgo"],
+  ignoreBinaries: ["oxlint", "nix", "tsgo"],
 };
 
 export default config;
