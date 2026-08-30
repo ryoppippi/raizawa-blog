@@ -3,15 +3,17 @@ import type { PostMeta } from "../lib/posts";
 
 interface PostListProps {
   posts: PostMeta[];
+  // カテゴリ/タグ経由の記事URLもあるので、呼ぶ側が前置きを決める
+  linkPrefix?: string;
 }
 
-const PostList: FC<PostListProps> = ({ posts }) => (
+const PostList: FC<PostListProps> = ({ posts, linkPrefix = "/posts/" }) => (
   <ul class="space-y-4">
     {posts.map((post) => (
       <li class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow" key={post.slug}>
         <div class="card-body p-5">
           <h2 class="card-title text-lg">
-            <a href={`/posts/${post.slug}`} class="hover:text-primary transition-colors">
+            <a href={`${linkPrefix}${post.slug}`} class="hover:text-primary transition-colors">
               {post.title}
             </a>
           </h2>
