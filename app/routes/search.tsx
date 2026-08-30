@@ -1,5 +1,6 @@
 import { createRoute } from "honox/factory";
 import { Layout } from "../components/layout";
+import { PageHeader } from "../components/page-header";
 import { SITE_TITLE, SITE_URL } from "../lib/config";
 
 // Pagefind Component UI assets are generated into /pagefind/ by the post-build
@@ -19,11 +20,7 @@ export default createRoute((c) =>
       description={`${SITE_TITLE}の記事を全文検索`}
       ogUrl={`${SITE_URL}/search`}
     >
-      <header class="card bg-base-100 shadow-sm mb-6">
-        <div class="card-body p-6">
-          <h1 class="text-2xl sm:text-3xl font-bold">検索</h1>
-        </div>
-      </header>
+      <PageHeader title="検索" />
       <main class="card bg-base-100 shadow-sm">
         <div class="card-body p-6" dangerouslySetInnerHTML={{ __html: searchBox }}></div>
       </main>

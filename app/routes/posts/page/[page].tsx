@@ -1,6 +1,7 @@
 import { ssgParams } from "hono/ssg";
 import { createRoute } from "honox/factory";
 import { Layout } from "../../../components/layout";
+import { PageHeader } from "../../../components/page-header";
 import { Pagination } from "../../../components/pagination";
 import { PostList } from "../../../components/post-list";
 import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "../../../lib/config";
@@ -34,11 +35,7 @@ export default createRoute(
         description={SITE_DESCRIPTION}
         ogUrl={`${SITE_URL}/posts/page/${currentPage}`}
       >
-        <header class="card bg-base-100 shadow-sm mb-6">
-          <div class="card-body p-6">
-            <h1 class="text-2xl sm:text-3xl font-bold">ブログ記事一覧 - ページ {currentPage}</h1>
-          </div>
-        </header>
+        <PageHeader title={`ブログ記事一覧 - ページ ${currentPage}`} />
         <main>
           <PostList posts={posts} />
           <Pagination currentPage={currentPage} totalPages={totalPages} />
