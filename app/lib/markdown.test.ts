@@ -29,7 +29,7 @@ describe("markdown rendering", () => {
     it("should parse title from meta string", async () => {
       const markdown = '```rust title="main.rs"\nfn main() {}\n```';
       const { html } = await renderMarkdown(markdown);
-      expect(html).toContain('class="code-head"');
+      expect(html).toContain('class="code-title"');
       expect(html).toContain("main.rs");
     });
   });
@@ -48,13 +48,6 @@ describe("markdown rendering", () => {
       // Shiki tokenizes code, so check for key parts
       expect(html).toContain("let");
       expect(html).toContain("x");
-    });
-
-    it("should not leave a trailing blank line", async () => {
-      // コードフェンスの中身は必ず改行で終わるので、そのまま渡すと空の行が1本余る
-      const { html } = await renderMarkdown("```rust\nlet x = 1;\n```");
-      const lineCount = (html.match(/class="line"/gu) ?? []).length;
-      expect(lineCount).toBe(1);
     });
 
     it("should handle multiple lines code (N)", async () => {

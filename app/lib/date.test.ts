@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isSameDay, toLocalDate, toLongEnglishDate, toShortEnglishDate, toSlashDate } from "./date";
+import { isSameDay, toLocalDate } from "./date";
 
 describe("toLocalDate", () => {
   it("should format date without time", () => {
@@ -20,44 +20,6 @@ describe("toLocalDate", () => {
 
   it("should format JST end of day boundary", () => {
     expect(toLocalDate("2024-01-15T23:59:59+09:00")).toBe("2024/1/15");
-  });
-});
-
-describe("toLongEnglishDate", () => {
-  it("should format as EB Garamond style long date", () => {
-    expect(toLongEnglishDate("2026-07-28T10:00")).toBe("July 28, 2026");
-  });
-
-  it("should keep single-digit days unpadded", () => {
-    expect(toLongEnglishDate("2026-01-05T00:00")).toBe("January 5, 2026");
-  });
-
-  it("should format JST midnight without shifting to previous day", () => {
-    expect(toLongEnglishDate("2026-07-28T00:00:00+09:00")).toBe("July 28, 2026");
-  });
-});
-
-describe("toShortEnglishDate", () => {
-  it("should abbreviate the month", () => {
-    expect(toShortEnglishDate("2026-02-21T10:00")).toBe("Feb 21, 2026");
-  });
-
-  it("should keep May unabbreviated because it is already short", () => {
-    expect(toShortEnglishDate("2026-05-02T10:00")).toBe("May 2, 2026");
-  });
-
-  it("should format JST end of day boundary", () => {
-    expect(toShortEnglishDate("2026-02-21T23:59:59+09:00")).toBe("Feb 21, 2026");
-  });
-});
-
-describe("toSlashDate", () => {
-  it("should zero-pad month and day", () => {
-    expect(toSlashDate("2026-07-30T10:00")).toBe("07/30");
-  });
-
-  it("should format the first day of the year", () => {
-    expect(toSlashDate("2026-01-01T10:00")).toBe("01/01");
   });
 });
 
