@@ -1,6 +1,8 @@
 import { ssgParams } from "hono/ssg";
 import { createRoute } from "honox/factory";
 import { Layout } from "../../components/layout";
+import { PageHeader } from "../../components/page-header";
+import { PostList } from "../../components/post-list";
 import { SITE_TITLE, SITE_URL } from "../../lib/config";
 import { getCategories, getPostsByCategory } from "../../lib/posts";
 
@@ -23,38 +25,10 @@ export default createRoute(
         description={`${category}の記事一覧`}
         ogUrl={`${SITE_URL}/category/${category}`}
       >
-        <header class="card bg-base-100 shadow-sm mb-6">
-          <div class="card-body p-6">
-            <h1 class="text-2xl sm:text-3xl font-bold">{category}</h1>
-          </div>
-        </header>
+        <PageHeader title={category} />
 
         <main>
-          <ul class="space-y-4">
-            {posts.map((post) => (
-              <li class="card bg-base-100 shadow-sm" key={post.slug}>
-                <div class="card-body p-4">
-                  <h2 class="card-title">
-                    <a href={`/category/${category}/posts/${post.slug}`} class="link link-hover">
-                      {post.title}
-                    </a>
-                  </h2>
-                  <div class="text-sm text-base-content/70">
-                    <time>{new Date(post.createdAt).toLocaleDateString("ja-JP")}</time>
-                  </div>
-                  {post.tags.length > 0 && (
-                    <div class="flex flex-wrap gap-2 mt-2">
-                      {post.tags.map((tag) => (
-                        <span class="badge badge-outline" key={tag}>
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
+          <PostList posts={posts} linkPrefix={`/category/${category}/posts/`} />
         </main>
       </Layout>,
     );

@@ -68,6 +68,10 @@ export default createRoute(
         next={next}
         linkPrefix={`/category/${category}/posts/`}
         ogUrl={`${SITE_URL}/category/${category}/posts/${fullSlug}`}
+        breadcrumbs={[
+          { href: "/category", label: "カテゴリ一覧" },
+          { href: `/category/${category}`, label: category },
+        ]}
       />,
     );
   },

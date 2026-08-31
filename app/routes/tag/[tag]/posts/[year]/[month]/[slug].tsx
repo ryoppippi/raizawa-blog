@@ -68,6 +68,10 @@ export default createRoute(
         next={next}
         linkPrefix={`/tag/${tag}/posts/`}
         ogUrl={`${SITE_URL}/tag/${tag}/posts/${fullSlug}`}
+        breadcrumbs={[
+          { href: "/tag", label: "タグ一覧" },
+          { href: `/tag/${tag}`, label: tag },
+        ]}
       />,
     );
   },
