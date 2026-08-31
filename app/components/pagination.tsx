@@ -11,7 +11,7 @@ const Pagination: FC<PaginationProps> = ({ currentPage, totalPages }) => {
   const pageNumbers = getPageNumbers(currentPage, totalPages);
 
   return (
-    <div class="flex justify-center mt-8 pt-6 border-t border-base-300">
+    <div class="flex justify-center mt-phi-6 pt-phi-5 border-t border-base-300">
       <div class="join">
         {currentPage > 1 && (
           <a href={prevHref} class="join-item btn btn-sm">

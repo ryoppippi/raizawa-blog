@@ -12,12 +12,12 @@ export default createRoute((c) => {
       <PageHeader title="タグ一覧" />
 
       <main>
-        <ul class="space-y-4">
+        <ul class="space-y-phi-4">
           {tags.map((tag) => {
             const posts = getPostsByTag(tag);
             return (
               <li class="card bg-base-100 shadow-sm" key={tag}>
-                <div class="card-body p-4">
+                <div class="card-body p-phi-4">
                   <h2 class="card-title">
                     <a href={`/tag/${tag}`} class="link link-hover">
                       {tag}

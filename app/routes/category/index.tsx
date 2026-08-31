@@ -16,12 +16,12 @@ export default createRoute((c) => {
       <PageHeader title="カテゴリ一覧" />
 
       <main>
-        <ul class="space-y-4">
+        <ul class="space-y-phi-4">
           {categories.map((category) => {
             const posts = getPostsByCategory(category);
             return (
               <li class="card bg-base-100 shadow-sm" key={category}>
-                <div class="card-body p-4">
+                <div class="card-body p-phi-4">
                   <h2 class="card-title">
                     <a href={`/category/${category}`} class="link link-hover">
                       {category}

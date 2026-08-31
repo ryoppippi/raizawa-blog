@@ -4,8 +4,8 @@ import type { TocItem } from "../lib/toc";
 const MIN_TOC_ITEMS = 2;
 const H2_LEVEL = 2;
 const H3_LEVEL = 3;
-const H3_INDENT = "pl-4";
-const H4_INDENT = "pl-8";
+const H3_INDENT = "pl-phi-4";
+const H4_INDENT = "pl-phi-6";
 
 const scrollspyScript = `{
   const tocLinks = document.querySelectorAll('.toc-link');
@@ -55,7 +55,7 @@ const TocList: FC<{ items: TocItem[] }> = ({ items }) => (
 
 // 目次は補助動線。本文より弱く見せたいので影ではなく罫線で囲む。
 const MobileToc: FC<{ items: TocItem[] }> = ({ items }) => (
-  <details class="collapse collapse-arrow bg-base-100 border border-base-300 rounded-lg mb-6 lg:hidden">
+  <details class="collapse collapse-arrow bg-base-100 border border-base-300 rounded-lg mb-phi-5 lg:hidden">
     <summary class="collapse-title font-bold">目次</summary>
     <div class="collapse-content">
       <TocList items={items} />
@@ -79,8 +79,8 @@ const TocLayout: FC<{ items: TocItem[]; children: Child }> = ({ items, children 
         </div>
         <div class="drawer-side z-30">
           <label for={TOC_DRAWER_ID} aria-label="close table of contents" class="drawer-overlay" />
-          <div class="bg-base-200 min-h-full w-60 p-4">
-            <h2 class="font-bold mb-2 text-sm">目次</h2>
+          <div class="bg-base-200 min-h-full w-60 p-phi-4">
+            <h2 class="font-bold mb-phi-3 text-sm">目次</h2>
             <TocList items={items} />
           </div>
         </div>

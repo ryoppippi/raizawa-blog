@@ -31,7 +31,7 @@ const PrevPostLink: FC<{ linkPrefix: string; prev: PostMeta | undefined }> = ({
       href={`${linkPrefix}${prev.slug}`}
       class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow"
     >
-      <div class="card-body p-4">
+      <div class="card-body p-phi-4">
         <span class="text-xs opacity-60">← 前の記事</span>
         <span class="text-sm font-medium">{prev.title}</span>
       </div>
@@ -51,7 +51,7 @@ const NextPostLink: FC<{ linkPrefix: string; next: PostMeta | undefined }> = ({
       href={`${linkPrefix}${next.slug}`}
       class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow sm:text-right"
     >
-      <div class="card-body p-4">
+      <div class="card-body p-phi-4">
         <span class="text-xs opacity-60">次の記事 →</span>
         <span class="text-sm font-medium">{next.title}</span>
       </div>
@@ -68,7 +68,7 @@ const PostNav: FC<{
     return <></>;
   }
   return (
-    <nav class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8 pt-6 border-t border-base-300">
+    <nav class="grid grid-cols-1 sm:grid-cols-2 gap-phi-4 mt-phi-6 pt-phi-5 border-t border-base-300">
       <PrevPostLink prev={prev} linkPrefix={linkPrefix} />
       <NextPostLink next={next} linkPrefix={linkPrefix} />
     </nav>
@@ -78,9 +78,9 @@ const PostNav: FC<{
 // タイトルと本文はひと続きの記事なので、別々の箱に分けず
 // 1枚の紙の中で罫線だけで区切る。
 const PostHeader: FC<{ meta: PostMeta }> = ({ meta }) => (
-  <header class="mb-6 pb-6 border-b border-base-300">
+  <header class="mb-phi-5 pb-phi-5 border-b border-base-300">
     <h1 class="text-2xl sm:text-3xl font-bold">{meta.title}</h1>
-    <div class="text-sm opacity-70 mt-1">
+    <div class="text-sm opacity-70 mt-phi-1">
       <time>{new Date(meta.createdAt).toLocaleDateString("ja-JP")}</time>
       <UpdatedAt createdAt={meta.createdAt} updatedAt={meta.updatedAt} />
       {meta.category !== "" && (
@@ -94,7 +94,7 @@ const PostHeader: FC<{ meta: PostMeta }> = ({ meta }) => (
       )}
     </div>
     {meta.tags.length > 0 && (
-      <div class="flex flex-wrap gap-2 mt-3">
+      <div class="flex flex-wrap gap-phi-2 mt-phi-3">
         {meta.tags.map((tag) => (
           <a class="badge badge-primary badge-outline" key={tag} href={`/tag/${tag}`}>
             {tag}
@@ -146,7 +146,10 @@ const PostDetail: FC<PostDetailProps> = ({
       <TocLayout items={post.toc}>
         {breadcrumbs.length > 0 && <Breadcrumbs items={breadcrumbs} />}
         {/* 読むための面。押せないので影は付けない */}
-        <article class="bg-base-100 rounded-lg p-6" data-pagefind-body={pagefindBody || undefined}>
+        <article
+          class="bg-base-100 rounded-lg p-phi-5"
+          data-pagefind-body={pagefindBody || undefined}
+        >
           <PostHeader meta={post.meta} />
           <div class="prose-article" dangerouslySetInnerHTML={{ __html: post.html }}></div>
         </article>

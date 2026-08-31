@@ -12,7 +12,7 @@ interface Crumb {
 // ヘッダーと重複していたため b903439 で消えた。ここではトップを入れず、
 // 現在地の表示に用途を絞る。stickyにもしない。
 const Breadcrumbs: FC<{ items: Crumb[] }> = ({ items }) => (
-  <nav class="breadcrumbs text-sm mb-4">
+  <nav class="breadcrumbs text-sm mb-phi-3">
     <ul>
       {items.map((item) => (
         <li key={item.href}>
