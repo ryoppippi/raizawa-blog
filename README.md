@@ -2,6 +2,9 @@
 
 https://r-aizawa.com
 
+外部 JS を配らない静的ブログ。何をどう決めてきたかは
+[docs/direction.md](docs/direction.md) に書いてある。
+
 ## Tech Stack
 
 - [HonoX](https://github.com/honojs/honox) - Full-stack framework

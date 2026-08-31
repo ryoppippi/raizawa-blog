@@ -53,3 +53,6 @@ bun.lockb
 result
 plans
 profiles/
+
+# 参照資料・PoC(コミットしない)
+sample/
