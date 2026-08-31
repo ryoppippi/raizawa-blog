@@ -1,5 +1,9 @@
 @import "tailwindcss" source("../app");
-@plugin "daisyui";
+/* 組み込みの light/dark は使っていなかったので出力ごと止める。
+   retro は生成りの地に濃い文字で、長文を読むのに向く */
+@plugin "daisyui" {
+  themes: retro --default;
+}
 
 html {
   scroll-behavior: smooth;
