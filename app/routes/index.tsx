@@ -17,9 +17,9 @@ export default createRoute((c) => {
         <div class="card bg-base-100 shadow-sm w-full max-w-md">
           <div class="card-body items-center text-center">
             <h1 class="card-title text-3xl font-bold">{SITE_TITLE}</h1>
-            <p class="text-base-content/70 mt-2">{SITE_DESCRIPTION}</p>
+            <p class="text-base-content/70 mt-phi-3">{SITE_DESCRIPTION}</p>
             <div class="divider" />
-            <div class="flex flex-col gap-3 w-full">
+            <div class="flex flex-col gap-phi-3 w-full">
               <a href="/posts" class="btn btn-primary">
                 ブログ記事一覧
               </a>
@@ -27,7 +27,7 @@ export default createRoute((c) => {
                 href="https://github.com/Xantibody"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="btn btn-outline gap-2"
+                class="btn btn-outline gap-phi-2"
               >
                 <span class="nf nf-fa-github text-lg" />
                 GitHub
@@ -36,7 +36,7 @@ export default createRoute((c) => {
                 href="https://zenn.dev/master_peace_36"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="btn btn-outline gap-2"
+                class="btn btn-outline gap-phi-2"
               >
                 Zenn
               </a>

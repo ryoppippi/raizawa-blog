@@ -66,7 +66,7 @@ const Layout: FC<LayoutProps> = ({
   const containerClass = containerWidth(wide);
 
   return (
-    <html lang="ja" data-theme="light">
+    <html lang="ja" data-theme="retro">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -92,6 +92,8 @@ const Layout: FC<LayoutProps> = ({
       <body class="min-h-screen bg-base-200">
         <div class="drawer">
           <input id={DRAWER_ID} type="checkbox" class="drawer-toggle" />
+          {/* 固定ヘッダーの高さ(navbar = 4rem)を pt-16 で打ち消している。
+              daisyUI が決めている値なので φ スケールには乗せない */}
           <div class="drawer-content flex flex-col pt-16">
             <div
               id="header-wrapper"
@@ -110,11 +112,11 @@ const Layout: FC<LayoutProps> = ({
                 </div>
               </div>
             </div>
-            <div class={`container mx-auto ${containerClass} px-4 py-6`}>{children}</div>
+            <div class={`container mx-auto ${containerClass} px-phi-4 py-phi-5`}>{children}</div>
           </div>
           <div class="drawer-side z-50">
             <label for={DRAWER_ID} aria-label="close sidebar" class="drawer-overlay" />
-            <ul class="menu bg-base-200 min-h-full w-80 p-4">
+            <ul class="menu bg-base-200 min-h-full w-80 p-phi-4">
               <li>
                 <a href="/">ホーム</a>
               </li>

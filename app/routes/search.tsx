@@ -22,7 +22,7 @@ export default createRoute((c) =>
     >
       <PageHeader title="検索" />
       <main class="card bg-base-100 shadow-sm">
-        <div class="card-body p-6" dangerouslySetInnerHTML={{ __html: searchBox }}></div>
+        <div class="card-body p-phi-5" dangerouslySetInnerHTML={{ __html: searchBox }}></div>
       </main>
     </Layout>,
   ),

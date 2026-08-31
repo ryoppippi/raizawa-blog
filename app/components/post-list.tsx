@@ -8,16 +8,16 @@ interface PostListProps {
 }
 
 const PostList: FC<PostListProps> = ({ posts, linkPrefix = "/posts/" }) => (
-  <ul class="space-y-4">
+  <ul class="space-y-phi-4">
     {posts.map((post) => (
       <li class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow" key={post.slug}>
-        <div class="card-body p-5">
+        <div class="card-body p-phi-4">
           <h2 class="card-title text-lg">
             <a href={`${linkPrefix}${post.slug}`} class="hover:text-primary transition-colors">
               {post.title}
             </a>
           </h2>
-          <div class="text-sm opacity-70 flex items-center gap-2">
+          <div class="text-sm opacity-70 flex items-center gap-phi-2">
             <time>{new Date(post.createdAt).toLocaleDateString("ja-JP")}</time>
             {post.category !== "" && (
               <>
@@ -29,7 +29,7 @@ const PostList: FC<PostListProps> = ({ posts, linkPrefix = "/posts/" }) => (
             )}
           </div>
           {post.tags.length > 0 && (
-            <div class="card-actions justify-start mt-2">
+            <div class="card-actions justify-start mt-phi-3">
               {post.tags.map((tag) => (
                 <a
                   class="badge badge-outline badge-sm hover:badge-primary"
